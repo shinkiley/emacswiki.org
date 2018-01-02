@@ -415,15 +415,15 @@
 
 (defvar variable-name-history () "Minibuffer history for variable names.")
 
-(define-key help-map "B"    'describe-buffer)
-(define-key help-map "c"    'describe-command)
-(define-key help-map "o"    'describe-option)
-(define-key help-map "\C-c" 'describe-key-briefly)
-(define-key help-map "\C-o" 'describe-option-of-type)
-(define-key help-map "\M-c" 'describe-copying)
-(define-key help-map "\M-f" 'describe-file)
-(define-key help-map "\M-k" 'describe-keymap)
-(define-key help-map "\M-l" 'find-function-on-key)
+;; (define-key help-map "B"    'describe-buffer)
+;; (define-key help-map "c"    'describe-command)
+;; (define-key help-map "o"    'describe-option)
+;; (define-key help-map "\C-c" 'describe-key-briefly)
+;; (define-key help-map "\C-o" 'describe-option-of-type)
+;; (define-key help-map "\M-c" 'describe-copying)
+;; (define-key help-map "\M-f" 'describe-file)
+;; (define-key help-map "\M-k" 'describe-keymap)
+;; (define-key help-map "\M-l" 'find-function-on-key)
 
 
 ;; Need Emacs 23 for version of `make-text-button' that accepts a string.
