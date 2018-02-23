@@ -1,18 +1,18 @@
 = Description =
 
-This page is dedicated to the '''emacs-w3m''', also known on this wiki as [::WThreeM],
-an Emacs interface to
-the [[w3m]] text browser.  Note that it has nothing to do
+'''emacs-w3m''', also known on this wiki as [::WThreeM],
+is an emacs internet browser and interface to
+the [[w3m]] text browser.  It supports tabs (ie. multiple buffers), images, https, cookies, history, bookmarks, asynchronous operation, session management, a form of "filtering" similar to firefox's greasemonkey, and more.  Note that it has nothing to do
 with the [[w3]] or the [[eww]] web browsers written entirely in EmacsLisp.  Using
 the Emacs interface to w3m is much faster than using w3, since the
 parsing and displaying is done by the external w3m process.
 
 Though you can download emacs-w3m from its homepage at
 http://emacs-w3m.namazu.org, please note that the official releases are extremely old. 
-It is best to download the CVS version from the homepage, or from an updated Git mirror such as https://github.com/ecbrown/emacs-w3m.
+It is best to download the CVS version from the homepage, or from an un-official third-party mirror such as exist on MELPA or github (https://github.com/ecbrown/emacs-w3m).
 
-There is a mailing-list, that's to a large extent in Japanese, but not completely.  Its archives are
-available at the website.  The list is also archived and gatewayed on
+There are English and Japanese language mailing-lists.  Their archives are
+available at the website.  The lists are also archived and gatewayed on
 Gmane, as <code>gmane.emacs.w3m</code>.  Emacs-w3m comes with a manual
 in TexInfo format, from which a normal, comfortable section of the manual in
 InfoMode form will be built by the installation process.
@@ -247,16 +247,14 @@ If W3M keeps hanging, try this:
 
 (add-to-list 'w3m-command-environment '("GC_NPROCS" . "1"))[http://emacs-w3m.namazu.org/ml/msg09797.html]
 
-==Searching emacswiki.org does not work with emacs/w3m==
-however, it does work from within xterm w3m
-
-	 Yes, it does if you put this in your .emacs file:
+==Searching emacswiki.org==
+Put this in your .emacs file:
 
    (require 'w3m-search)
    (add-to-list 'w3m-search-engine-alist
 		'("emacs-wiki" "http://www.emacswiki.org/cgi-bin/wiki.pl?search=%s"))
 
-	-- kruhft
+-- kruhft
 == Middle click to open url in a new sesstion (tab) ==
 I try to use:
 
@@ -264,222 +262,31 @@ I try to use:
 
 But it also changes the action of mouse-1. Ideas?
 
-== Not working with Emacs 23 ? ==
 
-I am using GnuEmacs version 23 and emacs-w3m as of 1.4.4 refuses to
-load. What is the correct way to use it then ?
+= Copy html links to org-mode =
 
-Try this (as suggested to me by EduardoOchs when I asked in EmacsChannel):
-<pre>
-(require 'w3m-e21)
-(provide 'w3m-e23)
-</pre>
-Works for me. :)
-[new]
-The current CVS version works out of the box with GnuEmacs 23 (as of 2007-05-09.) --ZedLopez
+You can copy a selection of text, including html links, from an emacs-w3m buffer into an org-mode buffer and have the html links automatically converted into org-mode links, so you don't lose the url information.
 
-If you installed w3m from a package, you might need to recompile the bytecode, as bytecode compiled by GnuEmacs 22 is not compatible with GnuEmacs 23
-
-== Not working with Emacs 23 and emacs-w3m from the CVS ? ==
-
-With Emacs 23 from the CVS the follow code can help you to use Emacs23
-and Emacs22 without any problem
-
-<pre>
-(if (= emacs-major-version 23)
-	(require 'w3m-ems)
-  (require 'w3m))
-</pre>
-
-This will load w3m-ems which is the proper package to load with the
-latest version of emacs-w3m from the CVS.
-[new]
-
-
-== Avoiding Some Problems with emacs-23 and emacs-w3m from cvs ==
-
-* build emacs-23 and then make sure it is the first emacs found in your $PATH. by typing "which emacs", you can find out which emacs the system finds first
-
-
-* this is important since you want to build emacs-w3m from cvs <b>with emacs23</b>, not with emacs22 if it is also installed on your system. if you compile it with emacs22, it won't work in emacs23.
-
-here is the .emacs snippet i use to load w3m (note your installation path may be different):
-
-<pre>
-(if (= emacs-major-version 23)
-    (progn
-      (add-to-list 'load-path "~/.el/emacs-w3m/share/emacs/site-lisp/w3m")
-      (require 'w3m-load))
-  (require 'w3m))
-</pre>
-
-if you don't know how to force your system to find emacs23 first, try:
-
-<pre>
-export PATH=/path/to/emacs23:$PATH
-</pre>
-
-
-as of june 16, 2008, this works
-
-BradClawsie
-
-= Emacs 23 from CVS and W3M in Debian - Internationalization and code pages =
-
-RichardRiley, 20 Oct 2008.
-
-What fixed it for me in Debian was to uninstall the w3m package and install w3mmee. All internationalization then worked. Load w3m in the normal manner.
-
-In a shell:
-
-<pre>
-sudo apt-get remove w3m
-sudo apt-get install w3mmee w3mmee-img
-</pre>
-
-Load w3m in the normal manner. Thanks to Andy Stewart for help via email and in the #emacs irc channel.
-
-If you use debian sid or testing you will not have w3mmee and w3mee-img but you can install w3m-el-snapshot.
-
-= W3M, HTML articles and org-mode =
-
-RichardRiley
-
-Below is some code from Andy Stewart (lazycat DOT manatee AT gmail.com) I requested to integrate w3m html buffers with org-mode. Bind the code to a suitable key
-and now you can copy the w3m html region into the clipboard in org-mode format so that pasting into org-mode buffers retains
-all html links.
-
-<pre>
-(defun w3m-get-buffer-with-org-style ()
-  "Get current buffer content with `org-mode' style.
-This function will encode `link-title' and `link-location' with `org-make-link-string'.
-And move buffer content to lastest of kill ring.
-So you can yank in `org-mode' buffer to get `org-mode' style content."
-  (interactive)
-  (let (transform-start
-        transform-end
-        return-content
-        link-location
-        link-title
-        temp-position
-        out-bound)
-    (if mark-active
-        (progn
-          (setq transform-start (region-beginning))
-          (setq transform-end (region-end))
-          (deactivate-mark))
-      (setq transform-start (point-min))
-      (setq transform-end (point-max)))
-    (message "Start transform link to `org-mode' style, please wait...")
-    (save-excursion
-      (goto-char transform-start)
-      (while (and (not out-bound)             ;not out of transform bound
-                  (not (w3m-no-next-link-p))) ;not have next link in current buffer
-        ;; store current point before jump next anchor
-        (setq temp-position (point))
-        ;; move to next anchor when current point is not at anchor
-        (or (w3m-anchor (point)) (w3m-get-next-link-start))
-        (if (<= (point) transform-end)  ;if current point is not out of transform bound
-            (progn
-              ;; get content between two links.
-              (if (> (point) temp-position)
-                  (setq return-content (concat return-content (buffer-substring temp-position (point)))))
-              ;; get link location at current point.
-              (setq link-location (w3m-anchor (point)))
-              ;; get link title at current point.
-              (setq link-title (buffer-substring (point) (w3m-get-anchor-end)))
-              ;; concat `org-mode' style url to `return-content'.
-              (setq return-content (concat return-content (org-make-link-string link-location link-title))))
-          (goto-char temp-position)     ;reset point before jump next anchor
-          (setq out-bound t)            ;for break out `while' loop
-          ))
-      ;; concat rest context of current buffer
-      (if (< (point) transform-end)
-          (setq return-content (concat return-content (buffer-substring (point) transform-end))))
-      (kill-new return-content)
-      (message "Transform link completed. You can get it from lastest kill ring."))))
-
-(defun w3m-get-anchor-start ()
-  "Move and return `point' for thst start of the current anchor."
-  (interactive)
-  (goto-char (or (previous-single-property-change (point) 'w3m-anchor-sequence) ;get start position of anchor
-                 (point)))                                                      ;or current point
-  (point))
-
-(defun w3m-get-anchor-end ()
-  "Move and return `point' after the end of current anchor."
-  (interactive)
-  (goto-char (or (next-single-property-change (point) 'w3m-anchor-sequence) ;get end position of anchor
-                 (point)))                                                  ;or current point
-  (point))
-
-(defun w3m-get-next-link-start ()
-  "Move and return `point' for that start of the current link."
-  (interactive)
-  (catch 'reach
-    (while (next-single-property-change (point) 'w3m-anchor-sequence) ;jump to next anchor
-      (goto-char (next-single-property-change (point) 'w3m-anchor-sequence))
-      (when (w3m-anchor (point))        ;return point when current is valid link
-        (throw 'reach nil))))
-  (point))
-
-(defun w3m-get-prev-link-start ()
-  "Move and return `point' for that end of the current link."
-  (interactive)
-  (catch 'reach
-    (while (previous-single-property-change (point) 'w3m-anchor-sequence) ;jump to previous anchor
-      (goto-char (previous-single-property-change (point) 'w3m-anchor-sequence))
-      (when (w3m-anchor (point))        ;return point when current is valid link
-        (throw 'reach nil))))
-  (point))
-
-
-(defun w3m-no-next-link-p ()
-  "Return t if no next link after cursor.
-Otherwise, return nil."
-  (save-excursion
-    (equal (point) (w3m-get-next-link-start))))
-
-(defun w3m-no-prev-link-p ()
-  "Return t if no prevoius link after cursor.
-Otherwise, return nil."
-  (save-excursion
-    (equal (point) (w3m-get-prev-link-start))))
-
-</pre>
-
-My binding looks like this
-
-<pre>
-(define-key w3m-minor-mode-map (kbd "M-w") 'w3m-get-buffer-with-org-style)
-</pre>
-
-18 Nov 2008 : gnus in cvs (emacs 23) rgr : change - emacs 23 article mode
-
-<pre>
-define-key gnus-article-mode-map (kbd "M-w") 'w3m-get-buffer-with-org-style)
-</pre>
-
-
-= org-w3m =
-
-I have create `org-w3m.el' in org-mode, now you can use function `org-w3m-copy-for-org-mode' do same thing.
-Or press "C-c C-x M-w" in w3m buffer.
-Enjoy! :)                                        -- AndyStewart
+Function `org-w3m-copy-for-org-mode' is bound by default to "C-c C-x M-w" in emacs-w3m buffers for this purpose.
 
 
 == Bookmarking ==
+
+In addition to emacs-w3m native support for bookmarking, the following external extensions are available:
 
 * [[Anything]] -- `M-x anything-w3m-bookmarks', narrow the list by typing some patterns(multiple patterns are space-delimited string),
 select with up/down/pgup/pgdown/C-p/C-n/C-v/M-v, choose with enter,
 With `TAB' actions can be selected if the selected bookmark has more than one possible action.
 With `C-z' the contents of bookmark is displayed without quitting anything session.
 
+
 * Regular Emacs bookmarks to URLs, for W3M.
 ** [[Bookmark+]]
 ** BookmarkExtension
 
-* Bookmark to delicious using `curl' and Lisp:anything-delicious.el (see `auth-source' to configure).
+=== Bookmark to delicious ===
+
+The following uses `curl' and Lisp:anything-delicious.el (see `auth-source' to configure).
 
 <pre>
         (defun w3m-add-delicious-bookmark (description tag)
@@ -538,31 +345,8 @@ With `C-z' the contents of bookmark is displayed without quitting anything sessi
 
 :: Not as simple now that OAuth is used; compare  http://delicious.com/help/api and http://delicious.com/help/oauthapi  --[[jcorneli]]
 
-[new]
 ::: Don't know what is OAuth, i will have a look. However the actual above code of Lisp:anything-delicious.el work fine.
 I have updated it. -- ThierryVolpiatto
-
-= w3m in Emacs 23 (on Debian and Ubuntu 9.10) =
-
-The `w3m-el' package is not fully compatible with Emacs 23. Installing `w3m-el-snapshot' instead worked for me. No additional setup like ##(require 'w3m-load)## was necessary.
-
-<pre>
-sudo aptitude install w3m-el-snapshot
-</pre>
-
-If you already have `w3m-el', it will be removed.
-
--- MarcoPiedra
-
-I confirm it. If you are on Ubuntu 9.10 and running Emacs 23, install w3m-el-snapshot. It works. Thank you, MarcoPiedra
-
---JeongtaeRoh
-
-= w3m in Emacs23 (Cygwin) =
-As with Debian and Ubuntu, above, the official w3m-el installed with Cygwin doesn't seem to work with Emacs 23, the error message being "Cannot open load file: w3m-e22". One solution is to get the latest emacs-w3m source code from CVS (see the instructions at http://emacs-w3m.namazu.org/) and build and install it (see the README for instructions).
-
--- jiri
-
 
 ==Browse url on other window==
 add this into the configuraion file of the emacs, it would make the emacs work as *help* buffer. This would help if you use w3m to check document
@@ -619,6 +403,107 @@ Some w3m-browse-* functions (e.g. w3m-browse-generic) rely on finding urls via b
 
 To work with Gmail, w3m requires a one-line  [[https://productforums.google.com/forum/#!topic/gmail/EKJfMizvywY patch]].
 After this, emacs-w3m works well with Gmail in Basic HTML mode.  In particular, compared e.g. with mu4e, new mail is seen instantaneously, without needing to be fetched first by e.g. offlineimap.
+
+==Specific to Emacs23==
+===Not working with Emacs 23 ?===
+
+I am using GnuEmacs version 23 and emacs-w3m as of 1.4.4 refuses to
+load. What is the correct way to use it then ?
+
+Try this (as suggested to me by EduardoOchs when I asked in EmacsChannel):
+<pre>
+(require 'w3m-e21)
+(provide 'w3m-e23)
+</pre>
+Works for me. :)
+[new]
+The current CVS version works out of the box with GnuEmacs 23 (as of 2007-05-09.) --ZedLopez
+
+If you installed w3m from a package, you might need to recompile the bytecode, as bytecode compiled by GnuEmacs 22 is not compatible with GnuEmacs 23
+
+===Not working with Emacs 23 and emacs-w3m from the CVS ?===
+
+With Emacs 23 from the CVS the follow code can help you to use Emacs23
+and Emacs22 without any problem
+
+<pre>
+(if (= emacs-major-version 23)
+	(require 'w3m-ems)
+  (require 'w3m))
+</pre>
+
+This will load w3m-ems which is the proper package to load with the
+latest version of emacs-w3m from the CVS.
+[new]
+
+
+===Avoiding Some Problems with emacs-23 and emacs-w3m from cvs===
+
+* build emacs-23 and then make sure it is the first emacs found in your $PATH. by typing "which emacs", you can find out which emacs the system finds first
+
+
+* this is important since you want to build emacs-w3m from cvs <b>with emacs23</b>, not with emacs22 if it is also installed on your system. if you compile it with emacs22, it won't work in emacs23.
+
+here is the .emacs snippet i use to load w3m (note your installation path may be different):
+
+<pre>
+(if (= emacs-major-version 23)
+    (progn
+      (add-to-list 'load-path "~/.el/emacs-w3m/share/emacs/site-lisp/w3m")
+      (require 'w3m-load))
+  (require 'w3m))
+</pre>
+
+if you don't know how to force your system to find emacs23 first, try:
+
+<pre>
+export PATH=/path/to/emacs23:$PATH
+</pre>
+
+
+as of june 16, 2008, this works
+
+BradClawsie
+
+===Emacs 23 from CVS and W3M in Debian - Internationalization and code pages===
+
+RichardRiley, 20 Oct 2008.
+
+What fixed it for me in Debian was to uninstall the w3m package and install w3mmee. All internationalization then worked. Load w3m in the normal manner.
+
+In a shell:
+
+<pre>
+sudo apt-get remove w3m
+sudo apt-get install w3mmee w3mmee-img
+</pre>
+
+Load w3m in the normal manner. Thanks to Andy Stewart for help via email and in the #emacs irc channel.
+
+If you use debian sid or testing you will not have w3mmee and w3mee-img but you can install w3m-el-snapshot.
+
+===w3m in Emacs 23 (on Debian and Ubuntu 9.10)===
+
+The `w3m-el' package is not fully compatible with Emacs 23. Installing `w3m-el-snapshot' instead worked for me. No additional setup like ##(require 'w3m-load)## was necessary.
+
+<pre>
+sudo aptitude install w3m-el-snapshot
+</pre>
+
+If you already have `w3m-el', it will be removed.
+
+-- MarcoPiedra
+
+I confirm it. If you are on Ubuntu 9.10 and running Emacs 23, install w3m-el-snapshot. It works. Thank you, MarcoPiedra
+
+--JeongtaeRoh
+
+===w3m in Emacs23 (Cygwin)===
+As with Debian and Ubuntu, above, the official w3m-el installed with Cygwin doesn't seem to work with Emacs 23, the error message being "Cannot open load file: w3m-e22". One solution is to get the latest emacs-w3m source code from CVS (see the instructions at http://emacs-w3m.namazu.org/) and build and install it (see the README for instructions).
+
+-- jiri
+
+
 
 ----
 CategoryExternalUtilities

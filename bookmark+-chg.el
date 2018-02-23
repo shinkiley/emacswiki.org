@@ -4,15 +4,15 @@
 ;; Description: Change logs for Bookmark+ libraries.
 ;; Author: Drew Adams
 ;; Maintainer: Drew Adams (concat "drew.adams" "@" "oracle" ".com")
-;; Copyright (C) 2000-2017, Drew Adams, all rights reserved.
+;; Copyright (C) 2000-2018, Drew Adams, all rights reserved.
 ;; Created: Fri Sep 15 07:58:41 2000
-;; Last-Updated: Mon Nov 27 15:04:44 2017 (-0800)
+;; Last-Updated: Mon Feb 12 12:24:44 2018 (-0800)
 ;;           By: dradams
-;;     Update #: 16364
+;;     Update #: 16372
 ;; URL: https://www.emacswiki.org/emacs/download/bookmark%2b-chg.el
-;; Doc URL: http://www.emacswiki.org/BookmarkPlus
+;; Doc URL: https://www.emacswiki.org/emacs/BookmarkPlus
 ;; Keywords: bookmarks, bookmark+
-;; Compatibility: GNU Emacs: 20.x, 21.x, 22.x, 23.x, 24.x, 25.x
+;; Compatibility: GNU Emacs: 20.x, 21.x, 22.x, 23.x, 24.x, 25.x, 26.x
 ;;
 ;; Features that might be required by this library:
 ;;
@@ -48,7 +48,7 @@
 ;;       Web'.
 ;;
 ;;    2. From the Emacs-Wiki Web site:
-;;       http://www.emacswiki.org/BookmarkPlus.
+;;       https://www.emacswiki.org/emacs/BookmarkPlus.
 ;;
 ;;    3. From the Bookmark+ group customization buffer:
 ;;       `M-x customize-group bookmark-plus', then click link
@@ -135,7 +135,7 @@
 ;;  navigate around the sections of this doc.  Linkd mode will
 ;;  highlight this Index, as well as the cross-references and section
 ;;  headings throughout this file.  You can get `linkd.el' here:
-;;  http://www.emacswiki.org/emacs/download/linkd.el.
+;;  https://www.emacswiki.org/emacs/download/linkd.el.
 ;;
 ;;  (@> "CHANGE LOG FOR `bookmark+-1.el'")
 ;;  (@> "CHANGE LOG FOR `bookmark+-bmu.el'")
@@ -146,6 +146,12 @@
  
 ;;;(@* "CHANGE LOG FOR `bookmark+-1.el'")
 ;;
+;; 2018/02/12 dadams
+;;     bookmark-write-file, bmkp-regexp-filtered-bookmark-name-alist-only:
+;;      Use bookmark-name-from-full-record, not car.
+;; 2018/02/10 dadams
+;;     bookmark-rename: No need to propertize name here - done in call to bookmark-set-name.
+;;     bookmark-alist-from-buffer: Use bmkp-bookmark-name-from-record, not car.
 ;; 2017/11/27 dadams
 ;;     bookmark-write-file:
 ;;       Corrected change made on 2017/01/10 (fix for bug #25365).

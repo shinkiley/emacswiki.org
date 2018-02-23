@@ -4,18 +4,18 @@
 ;; Description:  Zones of text - like multiple regions
 ;; Author: Drew Adams
 ;; Maintainer: Drew Adams
-;; Copyright (C) 2010-2017, Drew Adams, all rights reserved.
+;; Copyright (C) 2010-2018, Drew Adams, all rights reserved.
 ;; Created: Sun Apr 18 12:58:07 2010 (-0700)
 ;; Version: 2015-08-16
 ;; Package-Requires: ()
-;; Last-Updated: Wed Aug  2 14:05:04 2017 (-0700)
+;; Last-Updated: Tue Jan  9 14:51:56 2018 (-0800)
 ;;           By: dradams
-;;     Update #: 1783
+;;     Update #: 1813
 ;; URL: https://www.emacswiki.org/emacs/download/zones.el
-;; Doc URL: http://www.emacswiki.org/Zones
-;; Doc URL: http://www.emacswiki.org/MultipleNarrowings
+;; Doc URL: https://www.emacswiki.org/emacs/Zones
+;; Doc URL: https://www.emacswiki.org/emacs/MultipleNarrowings
 ;; Keywords: narrow restriction widen region zone
-;; Compatibility: GNU Emacs 20.x, 21.x, 22.x, 23.x, 24.x, 25.x,
+;; Compatibility: GNU Emacs 20.x, 21.x, 22.x, 23.x, 24.x, 25.x, 26.x
 ;;
 ;; Features that might be required by this library:
 ;;
@@ -42,7 +42,7 @@
 ;;  navigate around the sections of this doc.  Linkd mode will
 ;;  highlight this Index, as well as the cross-references and section
 ;;  headings throughout this file.  You can get `linkd.el' here:
-;;  http://www.emacswiki.org/emacs/download/linkd.el.
+;;  https://www.emacswiki.org/emacs/download/linkd.el.
 ;;
 ;;  (@> "Things Defined Here")
 ;;  (@> "Documentation")
@@ -428,6 +428,10 @@
 ;;
 ;;(@* "Change log")
 ;;
+;; 2018/01/09 dadams
+;;     zz-readable-marker:
+;;       If arg is already a readable marker just return it (idempotent).  If it is a marker then use its buffer.
+;;       If it is a number then use it as is, using BUFFER arg or current buffer name.
 ;; 2017/08/02 dadams
 ;;     Added: zz-izones-from-noncontiguous-region, zz-zones-from-noncontiguous-region,
 ;;            zz-noncontiguous-region-from-izones, zz-noncontiguous-region-from-zones, zz-dot-pairs.
@@ -645,7 +649,7 @@
 ;; General Public License for more details.
 ;;
 ;; You should have received a copy of the GNU General Public License
-;; along with GNU Emacs.  If not, see <http://www.gnu.org/licenses/>.
+;; along with GNU Emacs.  If not, see <https://www.gnu.org/licenses/>.
 ;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;
@@ -667,8 +671,8 @@
 zones.el bug: \
 &body=Describe bug here, starting with `emacs -Q'.  \
 Don't forget to mention your Emacs and library versions."))
-  :link '(url-link :tag "Download" "http://www.emacswiki.org/zones.el")
-  :link '(url-link :tag "Description" "http://www.emacswiki.org/Zones")
+  :link '(url-link :tag "Download" "https://www.emacswiki.org/emacs/download/zones.el")
+  :link '(url-link :tag "Description" "https://www.emacswiki.org/emacs/Zones")
   :link '(emacs-commentary-link :tag "Commentary" "zones"))
 
 (when (or (> emacs-major-version 24)    ; Emacs 24.4+
@@ -1264,26 +1268,32 @@ OBJECT is returned."
        (eq 'marker (nth 0 object))  (stringp (nth 1 object))  (numberp (nth 2 object))
        object))
 
-(defun zz-readable-marker (number-or-marker &optional buffer)
-  "Return a readable-marker object equivalent to NUMBER-OR-MARKER, or nil.
+(defun zz-readable-marker (number-or-marker &optional num-buffer)
+  "Return a readable marker equivalent to NUMBER-OR-MARKER, or nil.
 Return nil if NUMBER-OR-MARKER is not `number-or-marker-p'.
+\(If NUMBER-OR-MARKER is already a readable marker then return it.)
 
-This is a non-destructive operation.
+A readable marker satisfies `zz-readable-marker-p'.  It has the form
+\(marker BUFFER POSITION), where BUFFER is a buffer name (string) and
+POSITION is a buffer position (number).
 
-Optional arg BUFFER is a buffer or a buffer name (default: name of
-current buffer).  It is used as the marker buffer when
-`number-or-marker-p' is a number.
+If NUMBER-OR-MARKER is itself a readable marker then return it.
 
-A readable-marker object is a sexp of form (marker BUFFER POSITION),
-where BUFFER is a buffer name (string) and POSITION is buffer
-position (number)."
-  (let* ((buf   (get-buffer (or buffer  (current-buffer))))
-         (buf   (and buf  (buffer-name buf)))
-         (mrkr  (and (number-or-marker-p number-or-marker)
-                     (if (markerp number-or-marker)
-                         number-or-marker
-                       (with-current-buffer buf (copy-marker number-or-marker))))))
-    (and mrkr  `(marker ,buf ,(marker-position mrkr)))))
+If NUMBER-OR-MARKER is a marker then its buffer is used as BUFFER.
+
+If NUMBER-OR-MARKER is a number then:
+ If   NUM-BUFFER names an existing buffer then it is used as BUFFER.
+ Else the name of the current buffer is used as BUFFER.
+
+This is a non-destructive operation."
+  (cond ((zz-readable-marker-p number-or-marker) number-or-marker)
+        ((markerp number-or-marker)
+         `(marker ,(marker-buffer number-or-marker) ,(marker-position number-or-marker)))
+        ((numberp number-or-marker)
+         `(marker
+           ,(buffer-name (or (and (stringp num-buffer)  (get-buffer num-buffer))  (current-buffer)))
+           ,number-or-marker))
+        (t nil)))
 
 (defun zz-izones-p (value)
   "Return non-nil if VALUE is a (possibly empty) list of izones.

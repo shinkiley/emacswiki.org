@@ -4,17 +4,17 @@
 ;; Description: Extensions to `menu-bar.el'.
 ;; Author: Drew Adams
 ;; Maintainer: Drew Adams (concat "drew.adams" "@" "oracle" ".com")
-;; Copyright (C) 1996-2017, Drew Adams, all rights reserved.
+;; Copyright (C) 1996-2018, Drew Adams, all rights reserved.
 ;; Created: Thu Aug 17 10:05:46 1995
 ;; Version: 0
 ;; Package-Requires: ()
-;; Last-Updated: Thu Dec 21 10:20:32 2017 (-0800)
+;; Last-Updated: Fri Jan 19 21:33:55 2018 (-0800)
 ;;           By: dradams
-;;     Update #: 3797
+;;     Update #: 3803
 ;; URL: https://www.emacswiki.org/emacs/download/menu-bar%2b.el
-;; Doc URL: http://www.emacswiki.org/MenuBarPlus
+;; Doc URL: https://www.emacswiki.org/emacs/MenuBarPlus
 ;; Keywords: internal, local, convenience
-;; Compatibility: GNU Emacs: 20.x, 21.x, 22.x, 23.x, 24.x, 25.x
+;; Compatibility: GNU Emacs: 20.x, 21.x, 22.x, 23.x, 24.x, 25.x, 26.x
 ;;
 ;; Features that might be required by this library:
 ;;
@@ -128,6 +128,8 @@
 ;;
 ;;; Change Log:
 ;;
+;; 2018/01/19 dadams
+;;     make-frame(-on-display), delete-this-frame: Guard with (boundp 'menu-bar-frames-menu).
 ;; 2017/12/21 dadams
 ;;     Added make-frame(-on-display), delete-this-frame to Frames menu.
 ;;     Removed frame stuff from Files menu, since added it to Frames menu.
@@ -576,19 +578,20 @@ submenu of the \"Help\" menu."))
   (define-key menu-bar-frames-menu [maximize-frame]
     '(menu-item "Maximize Frame" maximize-frame :help "Maximize the selected frame")))
 
-(define-key menu-bar-frames-menu [make-frame-on-display]
-  '(menu-item "New Frame on Display..." make-frame-on-display
-    :visible (fboundp 'make-frame-on-display)
-    :help "Open a new frame on another display"))
-(define-key menu-bar-frames-menu [make-frame]
-  '(menu-item "New Frame" make-frame-command
-    :visible (fboundp 'make-frame-command)
-    :help "Open a new frame"))
-(define-key menu-bar-frames-menu [delete-this-frame] ; Name `delete-frame' is for a special event
-  '(menu-item "Delete Frame" delete-frame
-    :visible (and (fboundp 'delete-frame)  (fboundp 'delete-frame-enabled-p))
-    :enable (and (fboundp 'delete-frame-enabled-p)  (delete-frame-enabled-p))
-    :help "Delete currently selected frame"))
+(when (boundp 'menu-bar-frames-menu)
+  (define-key menu-bar-frames-menu [make-frame-on-display]
+    '(menu-item "New Frame on Display..." make-frame-on-display
+      :visible (fboundp 'make-frame-on-display)
+      :help "Open a new frame on another display"))
+  (define-key menu-bar-frames-menu [make-frame]
+    '(menu-item "New Frame" make-frame-command
+      :visible (fboundp 'make-frame-command)
+      :help "Open a new frame"))
+  (define-key menu-bar-frames-menu [delete-this-frame] ; `delete-frame' is for a special event
+    '(menu-item "Delete Frame" delete-frame
+      :visible (and (fboundp 'delete-frame)  (fboundp 'delete-frame-enabled-p))
+      :enable (and (fboundp 'delete-frame-enabled-p)  (delete-frame-enabled-p))
+      :help "Delete currently selected frame")))
 
 (when (featurep 'fit-frame)
   (define-key menu-bar-frames-menu [fit-frame]

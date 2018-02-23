@@ -1,20 +1,20 @@
-;;; ucs-cmds.el --- Commands to create commands that insert Unicode chars.
+;;; ucs-cmds.el --- Create commands to insert Unicode chars. -*- lexical-binding:t -*-
 ;;
 ;; Filename: ucs-cmds.el
 ;; Description: Commands to create commands that insert Unicode chars.
 ;; Author: Drew Adams
 ;; Maintainer: Drew Adams (concat "drew.adams" "@" "oracle" ".com")
-;; Copyright (C) 2011-2017, Drew Adams, all rights reserved.
+;; Copyright (C) 2011-2018, Drew Adams, all rights reserved.
 ;; Created: Tue Oct  4 07:32:20 2011 (-0700)
 ;; Version: 0
 ;; Package-Requires: ()
-;; Last-Updated: Wed Mar  8 15:12:40 2017 (-0800)
+;; Last-Updated: Wed Feb 14 13:23:19 2018 (-0800)
 ;;           By: dradams
-;;     Update #: 292
+;;     Update #: 327
 ;; URL: https://www.emacswiki.org/emacs/download/ucs-cmds.el
-;; Doc URL: http://www.emacswiki.org/UnicodeEncoding
+;; Doc URL: https://www.emacswiki.org/emacs/UnicodeEncoding
 ;; Keywords: unicode, characters, encoding, commands, ucs-names
-;; Compatibility: GNU Emacs: 23.x, 24.x, 25.x
+;; Compatibility: GNU Emacs: 23.x, 24.x, 25.x, 26.x
 ;;
 ;; Features that might be required by this library:
 ;;
@@ -108,13 +108,12 @@
 ;;   (ucsc-make-commands "\\(^hangul\\|^circled hangul\\|^parenthesized hangul\\)")
 ;;
 ;;
-;;
 ;;  Icicles Can Help
 ;;  ----------------
 ;;
 ;;  Use of the commands created using `ucsc-define-char-insert-cmd',
 ;;  `ucsc-make-commands', and `ucsc-insert' is enhanced by `Icicles'
-;;  (http://www.emacswiki.org/icicles.el).
+;;  (https://www.emacswiki.org/emacs/download/icicles.el).
 ;;
 ;;  When you enter the command name or code point interactively, you
 ;;  can take advantage of the more powerful completion of `Icicles',
@@ -126,11 +125,6 @@
 ;;  the non-elephant", removing whole sets of candidates that match
 ;;  patterns that you are *not* interested in.
 ;;
-;;  With `Icicles', commands, such as `ucsc-define-char-insert-cmd'
-;;  and `ucsc-insert', which use function `read-char-by-name' have the
-;;  additional advantage that the characters themselves are displayed
-;;  next to their names in buffer `*Completions*'.  So you see
-;;  immediately what the names represent: WYSIWYG.
 ;;
 ;;
 ;;  Commands defined here:
@@ -138,10 +132,21 @@
 ;;    `ucsc-define-char-insert-cmd', `ucsc-insert',
 ;;    `ucsc-make-commands'.
 ;;
+;;  Non-interactive functions defined here:
+;;
+;;    `ucsc-char-name', `ucsc-char-names', `ucsc-get-a-hash-key',
+;;    `ucsc-get-hash-keys'.
+;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;
 ;;; Change Log:
 ;;
+;; 2018/02/14 dadams
+;;     Adapted to Emacs 26, where ucs-names is a hash table.
+;;       Use lexical-binding.
+;;       Added: ucsc-char-name, ucsc-char-names, ucsc-get-a-hash-key, ucsc-get-hash-keys.
+;;       ucsc-define-char-insert-cmd: Use ucsc-char-name.
+;;       ucsc-make-commands: Handle hash-table-p case for ucs-names.
 ;; 2016/11/18 dadams
 ;;     ucsc-make-commands: Changed from a macro to a command that returns the commands.
 ;; 2015/01/11 dadams
@@ -182,6 +187,50 @@
 ;;
 ;;; Code:
 
+(defun ucsc-get-hash-keys (value hash-table &optional value-test-function)
+  "Return a list of keys associated with VALUE in HASH-TABLE.
+Optional arg VALUE-TEST-FUNCTION (default `equal') is the equality
+predicate used to compare values."
+  (setq value-test-function  (or value-test-function  #'equal))
+  (let ((keys  ()))
+    (maphash (lambda (key val)
+               (when (funcall value-test-function val value)
+                 (push key keys)))
+             hash-table)
+    keys))
+
+(defun ucsc-get-a-hash-key (value hash-table &optional value-test-function)
+  "Return a hash key associated with VALUE in HASH-TABLE.
+If there is more than one such key then it is undefined which is
+returned.
+Optional arg VALUE-TEST-FUNCTION (default `equal') is the equality
+predicate used to compare values."
+  (setq value-test-function  (or value-test-function  #'equal))
+  (catch 'get-a-hash-key
+    (maphash (lambda (key val)
+               (when (funcall value-test-function val value)
+                 (throw 'get-a-hash-key key)))
+             hash-table)
+    nil))
+
+(defun ucsc-char-names (character)
+  "Return a list of the names for CHARACTER."
+  (if (hash-table-p (ucs-names))
+      (ucsc-get-hash-keys character (ucs-names))
+    (mapcar #'car (ucs-names))))
+
+(defun ucsc-char-name (character &optional prefer-old-name-p)
+  "Return the name of CHARACTER, or nil if it has no name.
+This is Unicode property `name' if there is one, or property
+ `old-name' if not, or nil if neither.
+Non-nil optional arg PREFER-OLD-NAME-P means reverse the priority,
+ returning the old name if there is one."
+  (if prefer-old-name-p
+      (or (get-char-code-property character 'old-name)
+          (get-char-code-property character 'name))
+    (or (get-char-code-property character 'name)
+        (get-char-code-property character 'old-name))))
+
 ;;;###autoload
 (defun ucsc-define-char-insert-cmd (character &optional msgp)
   "Define a command that inserts CHARACTER.
@@ -199,7 +248,7 @@ Non-interactively:
  CHARACTER is a character - it must satisfy `characterp'.
  MSGP non-nil means echo the name of the created command."
   (interactive (list (read-char-by-name "Unicode (name or hex): ") t))
-  (let* ((char-name  (car (rassq character (ucs-names))))
+  (let* ((char-name  (ucsc-char-name character))
          (cmd-name   (and char-name
                           (downcase (replace-regexp-in-string " " "-" char-name nil t))))
          (cmd        (and cmd-name  (intern cmd-name))))
@@ -291,9 +340,14 @@ hyphens (`-'), and the command names are lowercase.
 Return the commands created, as a list of symbols."
   (interactive (list (read-regexp "Regexp: ") t))
   (let ((cmds  ()))
-    (dolist (name.code  (ucs-names))
-      (when (let ((case-fold-search  t)) (string-match (upcase regexp) (car name.code)))
-        (push (ucsc-define-char-insert-cmd (cdr name.code)) cmds)))
+    (if (hash-table-p (ucs-names))
+        (maphash (lambda (key val)
+                   (when (let ((case-fold-search  t)) (string-match-p (upcase regexp) key))
+                     (push (ucsc-define-char-insert-cmd val) cmds)))
+                 (ucs-names))
+      (dolist (name.code  (ucs-names))
+        (when (let ((case-fold-search  t)) (string-match-p (upcase regexp) (car name.code)))
+          (push (ucsc-define-char-insert-cmd (cdr name.code)) cmds))))
     (when msgp (message "Created commands: %s" cmds))
     cmds))
 

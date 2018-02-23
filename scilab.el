@@ -3,7 +3,7 @@
 ;; Copyright (C) 2001 Alexander Vigodner
 
 ;; Created: 03.01 2001
-;; Version: 2.1.27quad [Vincent Bela�che evolution, 22/06/2009]
+;; Version: 2.1.27quad [Vincent Belaïche evolution, 22/06/2009]
 ;; Author: Alexander Vigodner <avigodner@bloomberg.com>>
 
 ;;This program is free software; you can redistribute it and/or
@@ -1137,7 +1137,7 @@ Argument LIMIT is the maximum distance to scan."
 "m6pcchna" "m6permuto" "m6prevn2p" "m6prevn2st" "m6prfmatch" "m6relax" 
 "m6saveg" "m6sconcom" "m6showg" "m6showns" "m6showp" "m6ta2lpd" 
 "m6ta2lpu" "m6tconex" "m6transc" "m6umtree" "m6umtree1" "m6visitor" "macr2lst" 
-"matrix" "max" "maxi" "mclearerr" "mclose" "mean" "meof" "mfprintf" "mfscanf" 
+"matrix" "max" "maxi" "mclearerr" "mclose" "mean" "median" "meof" "mfprintf" "mfscanf" 
 "mget" "mgeti" "mgetstr" "min" "mini" "mlist" "mode" "mopen" "mprintf" "mput" 
 "mputstr" "mscanf" "mseek" "msprintf" "msscanf" "mtell" "mtlb_mode" 
 "mtlb_sparse" "mulf" "netclose" "netwindow" "netwindows" "newfun" "nnz" "norm" 
@@ -1158,7 +1158,7 @@ Argument LIMIT is the maximum distance to scan."
 "setscicosvars" "sfact" "sfinit" "sign" "simp" "simp_mode" "sin" "size" "sort" 
 "sparse" "spchol" "spcompack" "spec" "spget" "splin" "sprintf" "sqrt" "stacksize" 
 "stdev" "str2code" "strcat" "strindex" "string" "strsubst" "subf" "subplot" "sum" 
-"sva" "svd" "sylv" "symfcti" "syredi" "testmatrix" "timer" "tlist" "tr_zer" "tril" 
+"sva" "svd" "sylv" "symfcti" "syredi" "testmatrix" "timer" "title" "tlist" "tr_zer" "tril" 
 "triu" "type" "typename" "typeof" "uint16" "uint32" "uint8" "ulink" "unix" 
 "unsetmenu"
 "user" "var2vec" "variance" "varn" "vec2var" "what" "where" "whereis" "who" 
@@ -4583,12 +4583,13 @@ $\\|//\\)"))))
  You wil have variable `scilab-shell-command-switches' for this"
  :group 'scilab-shell
  :group 'scilab-setup
- :type 'string)
+ :type 'file)
 
 (defcustom scilab-shell-command-switches 
  '("-nw")
  "*Command line parameters run with `scilab-shell-command'. The standard
- flag is \"-nw\". If you remove it you will not launch scilab into emacs.
+ flag is \"-nw\".  If you remove it you will not launch scilab into
+ emacs for standard command scilab (you will need scilex or scilab-cli).
  You can add here your flags"
  :group 'scilab-shell
  :group 'scilab-setup
@@ -4777,10 +4778,13 @@ This name will have *'s surrounding it.")
  ;; Scilab shell does not work by default on the Windows platform.  Only
  ;; permit it's operation when the shell command string is different from
  ;; the default value.  (True when the engine program is running.)
- (if (and (or (eq window-system 'pc) (eq window-system 'w32))
-      (string= scilab-shell-command "scilab"))
-     (error "Scilab cannot be run as a inferior process.  \
+ (and (memq window-system '(pc w32))
+      (string= (file-name-sans-extension (file-name-nondirectory scilab-shell-command))
+	       "scilab")
+      (null (member "-nw" scilab-shell-command-switches))
+      (error "Scilab cannot be run as a inferior process.  \
 Try C-h f scilab-shell RET"))
+
 
  (require 'shell)
  (require 'term)
@@ -4793,8 +4797,15 @@ Try C-h f scilab-shell RET"))
 ;    (message "Sorry, your emacs cannot use the Scilab Shell GUD features.")
    (setq scilab-shell-enable-gud-flag nil))
 
- (let ((buffer (get-buffer-create (concat "*" scilab-shell-buffer-name "*"))))
-   (set-buffer buffer)
+ (let ((buffer (get-buffer-create (concat "*" scilab-shell-buffer-name "*")))
+       (command-switches
+	(if (string= (file-name-sans-extension (file-name-nondirectory scilab-shell-command))
+		     "scilab-cli")
+	    (let ((-nw (car-safe (member "-nw" scilab-shell-command-switches))))
+	      (if -nw (delq -nw (copy-sequence scilab-shell-command-switches))
+		scilab-shell-command-switches))
+	    scilab-shell-command-switches)))
+  (set-buffer buffer)
    (unless  (comint-check-proc buffer)
      ;; Build keymap here in case someone never uses comint mode
      (unless  scilab-shell-mode-map
@@ -4810,7 +4821,7 @@ Try C-h f scilab-shell RET"))
         buffer 
         scilab-shell-command
         nil ; no start file
-        scilab-shell-command-switches)
+        command-switches)
      (if running-xemacs 
      (setq system-uses-terminfo scilab-system-uses-terminfo))
      (comint-mode)
@@ -5038,7 +5049,7 @@ Keymap:
    ["Resume" scilab-continue-subjob :included(scilab-shell-active-p)
     :active(scilab-shell-active-p)]
    "----"
-   ["Start" scilab-shell (null (scilab-shell-active-p))]
+   ["Start" scilab-shell ( null (scilab-shell-active-p))]
    ["Restart" scilab-shell-restart (scilab-shell-active-p)]
    ["Exit" scilab-shell-exit (scilab-shell-active-p)]
    ["Quit" comint-quit-subjob (scilab-shell-active-p)]

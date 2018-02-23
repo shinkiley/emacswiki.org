@@ -191,6 +191,7 @@ git clone https://github.com/manateelazycat/deepin-emacs
 ** Reader:
 
 *** Lisp:doc-view-extension.el -- Some enhanced functions for [[DocViewMode]].
+*** Lisp:pdf-tools-extension.el -- Some enhanced functions for [https://github.com/politza/pdf-tools pdf-tools].
 
 ** Elisp installer:
 
@@ -309,12 +310,15 @@ git clone https://github.com/manateelazycat/deepin-emacs
 ** Lisp:init-visual-regexp.el -- Some configuration for [https://github.com/benma/visual-regexp.el VisualRegexp].
 
 ** Lisp:init-smex.el -- Some configuration for [https://github.com/nonsequitur/smex/ smex].
+** Lisp:init-auto-sudoedit.el -- Some configuration for [http://elpa.zilongshanren.com/melpa/auto-sudoedit-20171227.156.el auto-sudoedit], prompt user input password before edit system file.
 
 * Spell Check:
 
 ** Lisp:init-ispell.el -- Configuration file for [[InteractiveSpell]].
 
 ** Lisp:init-predictive.el -- Configuration file for [[PredictiveMode]].
+* Reader:
+** Lisp:init-pdf-tools.el -- Configuration file for [https://github.com/politza/pdf-tools pdf-tools]
 
 * Notes:
 

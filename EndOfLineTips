@@ -4,12 +4,11 @@ If you see '''##^M##''' in your file, you may have opened a file with DOS-style
 line endings (carriage return + line feed) while Emacs assumes it has
 Unix-style line endings (line feed only).  (The carriage-return character, sometimes abbreviated as ##CR##, is '''##^M##'''.  The line-feed character, sometimes abbreviated as ##LF##, is '''##^J##'''.)
 
-You can reopen the file with
-the correct line ending with a command like `M-x revert-buffer-with-coding-system utf-8-dos'. If your file is not in
-Unicode, be sure to specify the correct encoding system instead of
-`utf-8-dos'.
+You can reopen the file with the correct line ending with a command like `C-x C-m r dos'.
 
 If you have a mix of lines that end in ##^M## and lines that don't, you can  use `M-x replace-string RET C-q C-m RET' to remove the ##^M##'s.  '''`C-q'''' quotes the key you press right after it, letting you insert a ##^M## character.  Typing `C-m' won't work -- you have to hold down `Control' while hitting `q' followed by `m'.
+
+If you prefer seeing the '''##^M##''' instead of Emacs autodetecting the file as having dos line endings, then set `inhibit-eol-conversion' to non-`nil' (see [[Manual:Recognize Coding]] in the Emacs manual).
 
 ----
 
@@ -19,77 +18,44 @@ You can see an example from Elisp in SeijiZenitaniDotEmacs;
 
 Here are the specific codes:
 
-* `M-x set-buffer-file-coding-system utf-8-unix'  (for ##LF##)
-* `M-x set-buffer-file-coding-system utf-8-mac'   (for ##CR##)
-* `M-x set-buffer-file-coding-system utf-8-dos'   (for ##CR+LF##)
+* `C-x C-m f unix'  (for ##LF##)
+* `C-x C-m f mac'   (for ##CR##)
+* `C-x C-m f dos'   (for ##CR+LF##)
 
 ----
 
-This is what I use to toggle the end of line encoding:
+Toggle the end of line encoding:
 
-    (defun unix-file ()
-      "Change the current buffer to Latin 1 with Unix line-ends."
-      (interactive)
-      (set-buffer-file-coding-system 'iso-latin-1-unix t))
+{{{
+(defun unix-file ()
+  "Change the current buffer to Unix line-ends."
+  (interactive)
+  (set-buffer-file-coding-system 'unix t))
 
-    (defun dos-file ()
-      "Change the current buffer to Latin 1 with DOS line-ends."
-      (interactive)
-      (set-buffer-file-coding-system 'iso-latin-1-dos t))
+(defun dos-file ()
+  "Change the current buffer to DOS line-ends."
+  (interactive)
+  (set-buffer-file-coding-system 'dos t))
 
-    (defun mac-file ()
-      "Change the current buffer to Latin 1 with Mac line-ends."
-      (interactive)
-      (set-buffer-file-coding-system 'iso-latin-1-mac t))
-
-----
-Instead of iso-latin-1-unix, you can use undecided-unix, or other options depending on where you are and what you are doing. -- CharlesSebold
+(defun mac-file ()
+  "Change the current buffer to Mac line-ends."
+  (interactive)
+  (set-buffer-file-coding-system 'mac t))
+}}}
 
 See DosToUnix for other methods.
 
 ----
-I use this to automatically convert line endings to unix:
+Automatically convert line endings to unix:
 
-   (add-hook 'find-file-hook 'find-file-check-line-endings)
+{{{
+(defun no-junk-please-were-unixish ()
+  (let ((coding-str (symbol-name buffer-file-coding-system)))
+    (when (string-match "-\\(?:dos\\|mac\\)$" coding-str)
+      (set-buffer-file-coding-system 'unix))))
 
-   (defun dos-file-endings-p ()
-     (string-match "dos" (symbol-name buffer-file-coding-system)))
-
-   (defun find-file-check-line-endings ()
-     (when (dos-file-endings-p)
-         (set-buffer-file-coding-system 'undecided-unix)
-         (set-buffer-modified-p nil)))
-
-----
-This is similar, but tries to preserve the coding system rather than falling back to undecided-unix, 
-instead substituting the -unix variant of the -dos coding system in use:
-
-   (defun no-dos-please-were-unixish ()
-     (let ((coding-str (symbol-name buffer-file-coding-system)))
-       (when (string-match "-dos$" coding-str)
-         (setq coding-str
-               (concat (substring coding-str 0 (match-beginning 0)) "-unix"))
-         (message "CODING: %s" coding-str)
-         (set-buffer-file-coding-system (intern coding-str)) )))
-
-   (add-hook 'find-file-hooks 'no-dos-please-were-unixish)
-
-----
-And this handles both -mac and -dos codings:
-
-    (defun no-junk-please-were-unixish ()
-      (let ((coding-str (symbol-name buffer-file-coding-system)))
-        (when (string-match "-\\(?:dos\\|mac\\)$" coding-str)
-          (setq coding-str
-	        (concat (substring coding-str 0 (match-beginning 0)) "-unix"))
-          (message "CODING: %s" coding-str)
-          (set-buffer-file-coding-system (intern coding-str)) )))
-
-    (add-hook 'find-file-hooks 'no-junk-please-were-unixish)
-
-----
-The variable <code>inhibit-eol-conversion</code> might also be of interest.
-
+(add-hook 'find-file-hooks 'no-junk-please-were-unixish)
+}}}
 
 ----
 With Emacs 21 and later, you can preserve the current text coding system and change end-of-line conversion by running the command set-buffer-file-coding-system (C-x RET f) and specifying "unix", "dos", or "mac". Emacs 20 doesn't support that behavior, but this function should achieve the same goal:

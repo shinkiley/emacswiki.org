@@ -4,16 +4,16 @@
 ;; Description: Minibuffer completion and cycling.
 ;; Author: Drew Adams
 ;; Maintainer: Drew Adams (concat "drew.adams" "@" "oracle" ".com")
-;; Copyright (C) 1996-2017, Drew Adams, all rights reserved.
+;; Copyright (C) 1996-2018, Drew Adams, all rights reserved.
 ;; Created: Tue Aug  1 14:21:16 1995
-;; Last-Updated: Tue Dec 12 11:01:43 2017 (-0800)
+;; Last-Updated: Tue Feb 13 15:14:14 2018 (-0800)
 ;;           By: dradams
-;;     Update #: 28627
+;;     Update #: 28660
 ;; URL: https://www.emacswiki.org/emacs/download/icicles-doc1.el
 ;; Doc URL: https://www.emacswiki.org/emacs/Icicles
 ;; Keywords: internal, extensions, help, abbrev, local, minibuffer,
 ;;           keys, apropos, completion, matching, regexp, command
-;; Compatibility: GNU Emacs: 20.x, 21.x, 22.x, 23.x, 24.x, 25.x
+;; Compatibility: GNU Emacs: 20.x, 21.x, 22.x, 23.x, 24.x, 25.x, 26.x
 ;;
 ;; Features that might be required by this library:
 ;;
@@ -256,6 +256,7 @@
 ;;    (@> "Multi-Completions vs `completing-read-multiple'")
 ;;    (@> "Sorting Candidates by Their Second Part")
 ;;    (@> "Multi-Completions with a Part You Never See")
+;;    (@> "Some Icicles Commands Hard-Code Completion Methods")
 ;;
 ;;  (@> "Chapter & Verse: Searching Named Containers")
 ;;  (@> "Dot, Dot, Dot")
@@ -422,6 +423,7 @@
 ;;    (@file :file-name "icicles-doc2.el" :to "Icicles with Anything")
 ;;
 ;;  (@file :file-name "icicles-doc2.el" :to "Completion Methods and Styles")
+;;    (@file :file-name "icicles-doc2.el" :to "Some Icicles Commands Hard-Code Completion Methods")
 ;;    (@file :file-name "icicles-doc2.el" :to "Vanilla Emacs Styles and Option `completing-styles'")
 ;;    (@file :file-name "icicles-doc2.el" :to "Prefix Completion Method `vanilla'")
 ;;    (@file :file-name "icicles-doc2.el" :to "Icicles Completion Methods")
@@ -429,6 +431,7 @@
 ;;    (@file :file-name "icicles-doc2.el" :to "Command-Specific Completion Methods")
 ;;    (@file :file-name "icicles-doc2.el" :to "Fuzzy Completion")
 ;;      (@file :file-name "icicles-doc2.el" :to "Scatter-Match (Flex) Completion")
+;;      (@file :file-name "icicles-doc2.el" :to "`SPC' Scatter-Match Completion")
 ;;      (@file :file-name "icicles-doc2.el" :to "Swank (Fuzzy Symbol) Completion")
 ;;      (@file :file-name "icicles-doc2.el" :to "Fuzzy-Match Completion")
 ;;      (@file :file-name "icicles-doc2.el" :to "Levenshtein Completion")
@@ -3979,8 +3982,10 @@
 ;;      shown - e.g. `149/567 candidates shown'.
 ;;
 ;;    . The current completion method: vanilla, basic, fuzzy, swank
-;;      (fuzzy symbol), apropos, scatter, Levenshtein, Levenshtein
-;;      strict, or Jaro-Winkler.  See
+;;      (fuzzy symbol), apropos, scatter, SPC scatter, Levenshtein,
+;;      Levenshtein strict, or Jaro-Winkler.  (However, this
+;;      indication is meaningless for a few Icicles multi-completion
+;;      commands, such as `icicle-buffer' and `icicle-file'.)  See
 ;;      (@file :file-name "icicles-doc2.el" :to "Completion Methods and Styles")
 ;;      and user options `icicle-TAB-completion-methods' and
 ;;      `icicle-S-TAB-completion-methods-alist'.
@@ -5956,6 +5961,15 @@
 ;;  See (@> "Chapter & Verse: Searching Named Containers") for more
 ;;  about this.
 ;;
+;;(@* "Some Icicles Commands Hard-Code Completion Methods")
+;;  ** Some Icicles Commands Hard-Code Completion Methods **
+;;
+;;  Some Icicles commands that allow for multi-completion input ignore
+;;  your current choices of `TAB' and `S-TAB' completion method.  In
+;;  particular, this is the case for commands `icicle-file' and
+;;  `icicle-buffer' and similar.  Such commands use their own way of
+;;  matching the multi-completion parts.
+;;
 ;;  See Also:
 ;;
 ;;  * (@> "Multi-Commands")
@@ -5968,6 +5982,7 @@
 ;;    multi-completions using Emacs-Lisp code.
 ;;  * (@> "Sorting Candidates and Removing Duplicates")
 ;;  * (@> "Progressive Completion")
+;;  * (@file :file-name "icicles-doc2.el" :to "Completion Methods and Styles")
  
 ;;(@* "Chapter & Verse: Searching Named Containers")
 ;;
@@ -6066,9 +6081,9 @@
 ;;  matched any character *except* a newline character (aka `^J', aka
 ;;  `C-j').  Recent languages typically have an additional mode in
 ;;  which `.' can match any character, including a newline.  See, for
-;;  example, http://www.regular-expressions.info/dot.html and this
+;;  example, https://www.regular-expressions.info/dot.html and this
 ;;  language comparison for regexp features:
-;;  http://www.regular-expressions.info/refflavors.html.
+;;  https://www.regular-expressions.info/refflavors.html.
 ;;
 ;;  It is not unusual to manipulate multi-line completion candidates
 ;;  in Icicles, in which case it can be handy to let `.' match any
@@ -7294,8 +7309,9 @@
 ;;  my library `ucs-cmds.el' then you might want to remap that command
 ;;  to command `ucsc-insert', which is an enhancement.
 ;;
-;;  If option `icicle-read-char-by-name-multi-completion-flag' is
-;;  non-`nil' then Icicles enhances this in a few ways:
+;;  For Emacs 23-25, if option
+;;  `icicle-read-char-by-name-multi-completion-flag' is non-`nil' then
+;;  Icicles enhances this in a few ways:
 ;;
 ;;  * It shows in `*Completions*', for each candidate Unicode
 ;;    character, its name and code point, as well as the character

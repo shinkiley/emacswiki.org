@@ -4,16 +4,16 @@
 ;; Description: First part of package Bookmark+.
 ;; Author: Drew Adams, Thierry Volpiatto
 ;; Maintainer: Drew Adams (concat "drew.adams" "@" "oracle" ".com")
-;; Copyright (C) 2000-2017, Drew Adams, all rights reserved.
+;; Copyright (C) 2000-2018, Drew Adams, all rights reserved.
 ;; Copyright (C) 2009, Thierry Volpiatto.
 ;; Created: Mon Jul 12 13:43:55 2010 (-0700)
-;; Last-Updated: Sun Dec  3 15:54:34 2017 (-0800)
+;; Last-Updated: Mon Feb 12 12:19:34 2018 (-0800)
 ;;           By: dradams
-;;     Update #: 8583
+;;     Update #: 8602
 ;; URL: https://www.emacswiki.org/emacs/download/bookmark%2b-1.el
-;; Doc URL: http://www.emacswiki.org/BookmarkPlus
+;; Doc URL: https://www.emacswiki.org/emacs/BookmarkPlus
 ;; Keywords: bookmarks, bookmark+, placeholders, annotations, search, info, url, eww, w3m, gnus
-;; Compatibility: GNU Emacs: 20.x, 21.x, 22.x, 23.x, 24.x, 25.x
+;; Compatibility: GNU Emacs: 20.x, 21.x, 22.x, 23.x, 24.x, 25.x, 26.x
 ;;
 ;; Features that might be required by this library:
 ;;
@@ -46,7 +46,7 @@
 ;;       Web'.
 ;;
 ;;    2. From the Emacs-Wiki Web site:
-;;       http://www.emacswiki.org/BookmarkPlus.
+;;       https://www.emacswiki.org/emacs/BookmarkPlus.
 ;;
 ;;    3. From the Bookmark+ group customization buffer:
 ;;       `M-x customize-group bookmark-plus', then click link
@@ -65,7 +65,7 @@
 ;;  navigate around the sections of this doc.  Linkd mode will
 ;;  highlight this Index, as well as the cross-references and section
 ;;  headings throughout this file.  You can get `linkd.el' here:
-;;  http://www.emacswiki.org/emacs/download/linkd.el.
+;;  https://www.emacswiki.org/emacs/download/linkd.el.
 ;;
 ;;  (@> "Things Defined Here")
 ;;  (@> "User Options (Customizable)")
@@ -2417,8 +2417,10 @@ property.  Point is irrelevant and unaffected."
     ;; Do this regardless of Emacs version and `bmkp-propertize-bookmark-names-flag'.
     ;; If property needs to be stripped, that will be done when saving.
     (unless do-not-propertize-p
-      (dolist (bmk  bmks)
-        (put-text-property 0 (length (car bmk)) 'bmkp-full-record bmk (car bmk))))
+      (let (bname)
+        (dolist (bmk  bmks)
+          (setq bname  (bmkp-bookmark-name-from-record bmk))
+          (put-text-property 0 (length bname) 'bmkp-full-record bmk bname))))
     bmks))
 
 
@@ -3086,14 +3088,8 @@ candidate."
 ;;;             (define-key now-map  "\C-w" 'bookmark-yank-word)
 ;;;             now-map)
 ;;;           nil 'bookmark-history))))
-
     (when newname
-      (bookmark-set-name old newname)
-      ;; Put the bookmark on the name as property `bmkp-full-record'.
-      ;; Do this regardless of Emacs version and `bmkp-propertize-bookmark-names-flag'.
-      ;; If it needs to be stripped, that will be done when saving.
-      (put-text-property 0 (length newname) 'bmkp-full-record (bmkp-bookmark-record-from-name newname)
-                         newname)
+      (bookmark-set-name old newname)   ; (This also puts `bmkp-full-record' on bookmark name.)
       (bmkp-rename-for-marked-and-omitted-lists old newname) ; Rename in marked & omitted lists, if present.
       (setq bookmark-current-bookmark  newname)
       (unless batchp
@@ -3294,7 +3290,7 @@ contain a `%s' construct, so that it can be passed along with FILE to
         (goto-char (if (eq add 'append) end start)))
       (dolist (bmk  bookmark-alist)
         (unless (bmkp-temporary-bookmark-p bmk)
-          (setq bname  (car bmk)
+          (setq bname  (bookmark-name-from-full-record bmk)
                 fname  (bookmark-get-filename bmk))
           (cond (rem-all-p              ; Remove text properties from bookmark name and file name.
                  (set-text-properties 0 (length bname) () bname)
@@ -3320,9 +3316,9 @@ contain a `%s' construct, so that it can be passed along with FILE to
             (if (not (and rem-all-p  (bmkp-sequence-bookmark-p bmk)))
                 (pp bmk (current-buffer))
               ;; Remove text properties from bookmark names in the `sequence' entry of sequence bookmark.
-              (insert "(\"" (let ((sname  (copy-sequence (car bmk))))
-                              (set-text-properties 0 (length sname) () sname)
-                              sname)
+              (insert "(\"" (let ((seqbname  (copy-sequence (bookmark-name-from-full-record bmk))))
+                              (set-text-properties 0 (length seqbname) () seqbname)
+                              seqbname)
                       "\"\n")
               (dolist (prop  (cdr bmk))
                 (if (not (eq 'sequence (car prop)))
@@ -3729,8 +3725,7 @@ If nil then use `regexp-history'."
                                              (list (bmkp-find-tag-default-as-regexp)
                                                    (car regexp-search-ring)
                                                    (regexp-quote (or (car search-ring)  ""))
-                                                   (car (symbol-value
-                                                         query-replace-from-history-variable))))))
+                                                   (car (symbol-value query-replace-from-history-variable))))))
                (suggestions            (and (> emacs-major-version 22)
                                             (delete-dups (delq nil (delete "" suggestions)))))
                (history-add-new-input  nil) ; Do not automatically add default to history for empty input.
@@ -6471,7 +6466,8 @@ A new list is returned (no side effects)."
 (defun bmkp-regexp-filtered-bookmark-name-alist-only ()
   "`bookmark-alist' for bookmarks matching `bmkp-bmenu-filter-pattern'."
   (bookmark-maybe-load-default-file)
-  (bmkp-remove-if-not (lambda (bmk) (bmkp-string-match-p bmkp-bmenu-filter-pattern (car bmk)))
+  (bmkp-remove-if-not (lambda (bmk)
+                        (bmkp-string-match-p bmkp-bmenu-filter-pattern (bookmark-name-from-full-record bmk)))
                       bookmark-alist))
 
 (defun bmkp-regexp-filtered-file-name-alist-only ()
@@ -10030,8 +10026,8 @@ recorded number of visits.)  You can toggle the option using
 Bookmark bug: \
 &body=Describe bug here, starting with `emacs -Q'.  \
 Don't forget to mention your Emacs and library versions."))
-          :link '(url-link :tag "Download" "http://www.emacswiki.org/bookmark+.el")
-          :link '(url-link :tag "Description" "http://www.emacswiki.org/BookmarkPlus")
+          :link '(url-link :tag "Download" "https://www.emacswiki.org/emacs/download/bookmark%2b.el")
+          :link '(url-link :tag "Description" "https://www.emacswiki.org/emacs/BookmarkPlus")
           :link '(emacs-commentary-link :tag "Commentary" "bookmark+")
           (cond (bmkp-eww-auto-bookmark-mode
                  (add-hook   'eww-after-render-hook      'bmkp-set-eww-bookmark-here)
@@ -12623,8 +12619,8 @@ NOTE: If you use Emacs 21 then there is no global version of the mode
 Bookmark bug: \
 &body=Describe bug here, starting with `emacs -Q'.  \
 Don't forget to mention your Emacs and library versions."))
-               :link '(url-link :tag "Download" "http://www.emacswiki.org/bookmark+.el")
-               :link '(url-link :tag "Description" "http://www.emacswiki.org/BookmarkPlus")
+               :link '(url-link :tag "Download" "https://www.emacswiki.org/emacs/download/bookmark%2b.el")
+               :link '(url-link :tag "Description" "https://www.emacswiki.org/emacs/BookmarkPlus")
                :link '(emacs-commentary-link :tag "Commentary" "bookmark+")
                (when bmkp-auto-idle-bookmark-mode-timer
                  (cancel-timer bmkp-auto-idle-bookmark-mode-timer)
@@ -12749,8 +12745,8 @@ recorded number of visits.)  You can toggle the option using
 Bookmark bug: \
 &body=Describe bug here, starting with `emacs -Q'.  \
 Don't forget to mention your Emacs and library versions."))
-          :link '(url-link :tag "Download" "http://www.emacswiki.org/bookmark+.el")
-          :link '(url-link :tag "Description" "http://www.emacswiki.org/BookmarkPlus")
+          :link '(url-link :tag "Download" "https://www.emacswiki.org/emacs/download/bookmark%2b.el")
+          :link '(url-link :tag "Description" "https://www.emacswiki.org/emacs/BookmarkPlus")
           :link '(emacs-commentary-link :tag "Commentary" "bookmark+")
           (if bmkp-info-auto-bookmark-mode
               (add-hook 'Info-selection-hook 'bmkp-set-info-bookmark-with-node-name)
@@ -12828,8 +12824,8 @@ positive.  Non-interactively there is no prompt for confirmation."
 Bookmark bug: \
 &body=Describe bug here, starting with `emacs -Q'.  \
 Don't forget to mention your Emacs and library versions."))
-            :link '(url-link :tag "Download" "http://www.emacswiki.org/bookmark+.el")
-            :link '(url-link :tag "Description" "http://www.emacswiki.org/BookmarkPlus")
+            :link '(url-link :tag "Download" "https://www.emacswiki.org/emacs/download/bookmark%2b.el")
+            :link '(url-link :tag "Description" "https://www.emacswiki.org/emacs/BookmarkPlus")
             :link '(emacs-commentary-link :tag "Commentary" "bookmark+")
             (cond ((not bmkp-temporary-bookmarking-mode) ; Turn off.
                    (when (fboundp 'bmkp-unlight-bookmarks) ; In `bookmark+-lit.el'.

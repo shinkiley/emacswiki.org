@@ -244,6 +244,60 @@ Here is how to use the code for rcirc:
 
 Change the ##7## in the code above to something smaller such as ##4.5## if you want a wider spread of colors.
 
+== A simpler piece of code ==
+
+Here is a simpler explanation from Stack Overflow:
+
+[quote]
+The safest bet is to conform with the World Wide Web Consortium’s (W3C) Web Content Accessibility Guidelines 2.0, which specify a brightness [http://www.w3.org/TR/UNDERSTANDING-WCAG20/visual-audio-contrast-contrast.html contrast ratio of 4.5:1 for regular text (12 pt or smaller), and 3.0:1 for large text]. Contrast ratio is defined as:
+
+##[Y(b) + 0.05] / [Y(d) + 0.05]##
+
+Where Y(b) is the brightness (luminance) of the brighter color and Y(d) is the brightness of the darker color.
+
+You calculate luminance Y by first converting each of the color’s RGB values to gamma adjusted normalize rgb values:
+
+[code]
+r = (R/255)^2.2
+b = (B/255)^2.2
+g = (G/255)^2.2
+[/code]
+
+Then combine them using sRGB constants (rounded to 4 places):
+
+##Y = 0.2126*r + 0.7151*g + 0.0721*b##
+
+-- [https://stackoverflow.com/questions/3116260/given-a-background-color-how-to-get-a-foreground-color-that-makes-it-readable-o#3118280 answered by Michael Zuschlag]
+[/quote]
+
+Here's how to translate this into Emacs Lisp. The code waits until
+rcirc is actually loaded before preparing the colors so that we can be
+reasonably sure any themes or other settings affecting the default
+background color have already taken effect.
+
+{{{
+;; To check out the list, evaluate (list-colors-display rcirc-colors)
+;; To reset map (setq rcirc-color-mapping (make-hash-table :test 'equal))
+(eval-after-load 'rcirc
+  '(setq rcirc-colors
+	 (let ((candidates nil)
+	       (color nil)
+	       (y1 (rcirc-colors-Y (face-background 'default))))
+	   (dolist (item color-name-rgb-alist)
+	     (setq color (car item))
+	     (unless (color-gray-p color)
+	       ;; Contrast ration is (Y(b) + 0.05) / (Y(d) + 0.05) where
+	       ;; Y(b) is the brightness (luminance) of the brighter
+	       ;; color and Y(d) is the brightness of the darker color.
+	       (let* ((y2 (rcirc-colors-Y color))
+		      (r (if (> y1 y2)
+			     (/ (+ y1 0.05) (+ y2 0.05))
+			   (/ (+ y2 0.05) (+ y1 0.05)))))
+		 (when (> r 4.5)
+		   (setq candidates (cons color candidates))))))
+	   candidates)))
+}}}
+
 ----
 CategoryChatClient
 [[rcirc]]

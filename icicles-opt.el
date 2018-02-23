@@ -4,16 +4,16 @@
 ;; Description: User options (customizable variables) for Icicles
 ;; Author: Drew Adams
 ;; Maintainer: Drew Adams (concat "drew.adams" "@" "oracle" ".com")
-;; Copyright (C) 1996-2017, Drew Adams, all rights reserved.
+;; Copyright (C) 1996-2018, Drew Adams, all rights reserved.
 ;; Created: Mon Feb 27 09:22:14 2006
-;; Last-Updated: Sun Dec 10 22:45:43 2017 (-0800)
+;; Last-Updated: Tue Feb 13 14:40:20 2018 (-0800)
 ;;           By: dradams
-;;     Update #: 6203
+;;     Update #: 6226
 ;; URL: https://www.emacswiki.org/emacs/download/icicles-opt.el
 ;; Doc URL: https://www.emacswiki.org/emacs/Icicles
 ;; Keywords: internal, extensions, help, abbrev, local, minibuffer,
 ;;           keys, apropos, completion, matching, regexp, command
-;; Compatibility: GNU Emacs: 20.x, 21.x, 22.x, 23.x, 24.x, 25.x
+;; Compatibility: GNU Emacs: 20.x, 21.x, 22.x, 23.x, 24.x, 25.x, 26.x
 ;;
 ;; Features that might be required by this library:
 ;;
@@ -193,7 +193,7 @@
 ;;    `icicle-prefix-cycle-previous-alt-action-keys',
 ;;    `icicle-prefix-cycle-previous-help-keys',
 ;;    `icicle-quote-shell-file-name-flag',
-;;    `icicle-read-char-by-name-multi-completion-flag' (Emacs 23+),
+;;    `icicle-read-char-by-name-multi-completion-flag' (Emacs 23-25),
 ;;    `icicle-read+insert-file-name-keys', `icicle-regexp-quote-flag',
 ;;    `icicle-regexp-search-ring-max', `icicle-region-background',
 ;;    `icicle-require-match-flag', `icicle-saved-completion-sets',
@@ -233,7 +233,7 @@
 ;;    `icicle-use-candidates-only-once-flag',
 ;;    `icicle-widgets-to-redefine', `icicle-word-completion-keys',
 ;;    `icicle-WYSIWYG-Completions-flag', `icicle-yank-function',
-;;    `icicle-zap-to-char-candidates' (Emacs 23+).
+;;    `icicle-zap-to-char-candidates' (Emacs 23-25).
 ;;
 ;;  Functions defined here:
 ;;
@@ -2975,7 +2975,8 @@ See also option `icicle-buffer-skip-functions'."
     ;; Emacs 25+ uses `elisp-completion-at-point', not `lisp-completion-at-point'.
     ,@(if (fboundp 'elisp-completion-at-point) '(elisp-completion-at-point) '(lisp-completion-at-point))
     minibuffer-default-add-completions
-    read-char-by-name                    read-color
+    ,@(and (< emacs-major-version 26) '(read-char-by-name))
+    read-color                           
     read-from-minibuffer                 read-string
     recentf-make-menu-items)
   "*List of symbols representing functions to be redefined in Icicle mode.
@@ -4002,7 +4003,7 @@ Remember that you can use multi-command `icicle-toggle-option' anytime
 \(`M-i M-i' during completion) to toggle an option value."
   :type 'boolean :group 'Icicles-Miscellaneous)
 
-(when (fboundp 'read-char-by-name)      ; Emacs 23+
+(when (and (fboundp 'read-char-by-name)  (< emacs-major-version 26)) ; Emacs 23-25
   (defcustom icicle-read-char-by-name-multi-completion-flag t
     "*Non-nil means `icicle-read-char-by-name' uses multi-completion.
 If nil then a candidate is just as in vanilla Emacs.
@@ -4601,6 +4602,7 @@ The candidates are highlighted in buffer `*Completions*' using face
 (defcustom icicle-S-TAB-completion-methods-alist ; Cycle with `M-('.
   `(("apropos" . string-match)
     ("scatter" . icicle-scatter-match)
+    ("SPC scatter" . icicle-SPC-scatter-match)
     ,@(and (require 'fuzzy nil t)       ; `fuzzy.el', part of library Autocomplete.
            '(("Jaro-Winkler" . fuzzy-match)))
     ,@(and (require 'levenshtein nil t)
@@ -4613,6 +4615,10 @@ messages to indicate the type of completion matching.
 
 By default, `S-TAB' is the key for this completion. The actual keys
 used are the value of option `icicle-apropos-complete-keys'.
+
+NOTE: This option has no effect on some Icicles commands, in
+particular commands that allow for multi-completion input, such as
+`icicle-buffer' and `icicle-file'.
 
 See also options `icicle-TAB-completion-methods' and
 `icicle-S-TAB-completion-methods-per-command'."
@@ -4637,7 +4643,11 @@ for `TAB' completion.  The default behavior is provided by option
 NOTE: If you remove an entry from this list, that does NOT remove the
 advice for that command.  To do that you will need to explicitly
 invoke command `icicle-set-S-TAB-methods-for-command' using a negative
-prefix argument (or else start a new Emacs session)."
+prefix argument (or else start a new Emacs session).
+
+NOTE: This option has no effect on some Icicles commands, in
+particular commands that allow for multi-completion input, such as
+`icicle-buffer' and `icicle-file'."
   :type (let ((methods  ()))
           (when (require 'levenshtein nil t)
             (push '(const :tag "Levenshtein strict"
@@ -4648,6 +4658,7 @@ prefix argument (or else start a new Emacs session)."
           (when (require 'fuzzy nil t)  ; `fuzzy.el', part of library Autocomplete.
             (push '(const :tag "Jaro-Winkler" ("Jaro-Winkler" . fuzzy-match)) methods))
           (push '(const :tag "scatter" ("scatter" . icicle-scatter-match)) methods)
+          (push '(const :tag "SPC scatter" ("SRC scatter" . icicle-SPC-scatter-match)) methods)
           (push '(const :tag "apropos" ("apropos" . string-match)) methods)
           `(alist
             :key-type   (restricted-sexp
@@ -4747,7 +4758,6 @@ completion produces no match when you think it should, remember that
 you can use `\\[icicle-next-TAB-completion-method]' on the fly to \
 change the completion method.
 
-
 If you do not customize `icicle-TAB-completion-methods', then the
 default value (that is, the available `TAB' completion methods) will
 reflect your current Emacs version and whether you have loaded
@@ -4755,6 +4765,10 @@ libraries `fuzzy-match.el' and `el-swank-fuzzy.el'.
 
 By default, `TAB' is the key for this completion. The actual keys
 used are the value of option `icicle-prefix-complete-keys'.
+
+NOTE: This option has no effect on some Icicles commands, in
+particular commands that allow for multi-completion input, such as
+`icicle-buffer' and `icicle-file'.
 
 See also options `icicle-TAB-completion-methods-per-command'
 `icicle-S-TAB-completion-methods-alist'."
@@ -4787,7 +4801,11 @@ option `icicle-TAB-completion-methods' (and
 NOTE: If you remove an entry from this list, that does NOT remove the
 advice for that command.  To do that you will need to explicitly
 invoke command `icicle-set-TAB-methods-for-command' using a negative
-prefix argument (or else start a new Emacs session)."
+prefix argument (or else start a new Emacs session).
+
+NOTE: This option has no effect on some Icicles commands, in
+particular commands that allow for multi-completion input, such as
+`icicle-buffer' and `icicle-file'."
   :type (let ((methods  ()))
           ;; Unfortunately, `el-swankfuzzy.el' requires `cl.el' at runtime.
           ;; Comment this first sexp out if you do not want that.
@@ -5084,7 +5102,8 @@ toggle Icicle mode off and then back on."
     (,icicle-yank-function         icicle-yank-maybe-completing        t) ; `C-y'
     (yank-pop                      icicle-yank-pop-commands            (featurep 'second-sel)) ; `M-y'
     (yank-pop-commands             icicle-yank-pop-commands            (featurep 'second-sel)) ; `M-y'
-    (zap-to-char                   icicle-zap-to-char (fboundp 'read-char-by-name)) ; `M-z' (Emacs 23+)
+    (zap-to-char                   icicle-zap-to-char
+     (and (fboundp 'read-char-by-name)  (< emacs-major-version 26)))      ; `M-z' (Emacs 23-25)
 
     ;; The following are available only if you use library `bookmark+.el'.
 
@@ -5736,7 +5755,7 @@ that (non-Icicles) function does not support WYSIWYG candidates."
           (const  :tag "Show candidate as is, with no text properties"      nil))
   :group 'Icicles-Completions-Display)
 
-(when (fboundp 'read-char-by-name)      ; Emacs 23+
+(when (and (fboundp 'read-char-by-name)  (< emacs-major-version 26)) ; Emacs 23-25
   (defcustom icicle-zap-to-char-candidates nil
     "*Names to use for `icicle-zap-to-char' when completing.
 Either a function that returns a list of the same form as `ucs-names',

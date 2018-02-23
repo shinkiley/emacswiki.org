@@ -4,17 +4,17 @@
 ;; Description: Show keys as you use them.
 ;; Author: Drew Adams
 ;; Maintainer: Drew Adams
-;; Copyright (C) 2014-2017, Drew Adams, all rights reserved.
+;; Copyright (C) 2014-2018, Drew Adams, all rights reserved.
 ;; Created: Sun Mar 22 16:24:39 2015 (-0700)
 ;; Version: 0
 ;; Package-Requires: ()
-;; Last-Updated: Wed Dec 27 09:16:53 2017 (-0800)
+;; Last-Updated: Sat Feb 10 08:39:55 2018 (-0800)
 ;;           By: dradams
-;;     Update #: 151
+;;     Update #: 157
 ;; URL: https://www.emacswiki.org/emacs/download/showkey.el
 ;; Doc URL: https://www.emacswiki.org/emacs/ShowKey
 ;; Keywords: help keys mouse
-;; Compatibility: GNU Emacs: 23.x, 24.x, 25.x
+;; Compatibility: GNU Emacs: 23.x, 24.x, 25.x, 26.x
 ;; 
 ;; Features that might be required by this library:
 ;;
@@ -100,6 +100,9 @@
 ;; 
 ;;; Change Log:
 ;;
+;; 2018/02/10 dadams
+;;     showkey-show-tooltip:
+;;       Use selected-frame, not nil, as second arg to x-show-tip.  See Emacs bug #30399.
 ;; 2017/12/27 dadams
 ;;     Added: showkey-tooltip-sleep-time.
 ;;     showkey-show-tooltip: Use showkey-tooltip-sleep-time.
@@ -150,7 +153,7 @@ showkey.el bug: \
 Don't forget to mention your Emacs and library versions."))
   :link '(url-link :tag "Other Libraries by Drew"
           "https://www.emacswiki.org/emacs/DrewsElispLibraries")
-  :link '(url-link :tag "Download" "https://www.emacswiki.org/emacs/showkey.el")
+  :link '(url-link :tag "Download" "https://www.emacswiki.org/emacs/download/showkey.el")
   :link '(url-link :tag "Description" "https://www.emacswiki.org/emacs/ShowKey")
   :link '(emacs-commentary-link :tag "Commentary" "showkey"))
 
@@ -305,7 +308,7 @@ are not indicated."
             (set-mouse-position (selected-frame) (+ 3 x) (+ 2 y))))
         (x-show-tip (propertize cmd-desc
                                 'face `(:foreground "red" :height ,showkey-tooltip-height))
-                    nil
+                    (selected-frame)    ; Emacs bug #30399 says nil is broken for Emacs < 27
                     nil
                     showkey-tooltip-timeout)
         (sleep-for showkey-tooltip-sleep-time)))))

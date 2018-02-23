@@ -69,7 +69,7 @@ The same question, applied to functional programming:
 IOW, it's about '''modularity''', and modularity is all about '''glue''': the ''ability to combine'' pieces.
 
 For a fabulous essay on the modularity and "glue" of functional programming, see
-[[WikiPedia:John_Hughes_(computer_scientist)|John Hughes]]'s classic, ''Why Functional Programming Matters'': <tt> http://www.cs.kent.ac.uk/people/staff/dat/miranda/whyfp90.pdf </tt> or <tt>http://www.md.chalmers.se/~rjmh/Papers/whyfp.html. </tt> From the Introduction (emphasis added):
+[[WikiPedia:John_Hughes_(computer_scientist)|John Hughes]]'s classic, ''Why Functional Programming Matters'': <tt> http://www.cs.kent.ac.uk/people/staff/dat/miranda/whyfp90.pdf </tt> or <tt>http://www.cse.chalmers.se/~rjmh/Papers/whyfp.html </tt> From the Introduction (emphasis added):
 
 [new]
 : The special characteristics and advantages of functional programming are
@@ -116,7 +116,7 @@ functional programmer should strive towards.
 
 An analogy is then drawn with the "no <code>GOTO</code>!" arguments in favor of structured programming -- and the conclusion is that it is its ''modularity'', not its lack of <code>GOTO</code>, that gives structured programming its advantage. The rest of the paper explores the modularity advantages provided by higher-order functions and lazy evaluation.
 
-I heartily recommend this 20-year old paper. I guarantee that it is an eye-opener, no matter how familiar you are with functional programming and programming-language design.
+I heartily recommend this 35-year old paper. I guarantee that it is an eye-opener, no matter how familiar you are with functional programming and programming-language design.
 
 Here, BTW, is what John himself says about this paper:
 
@@ -188,7 +188,7 @@ And Emacs has improved greatly over the years. I still use Emacs 20, as well as 
 
 This page describes my EmacsLisp libraries: '''DrewsElispLibraries'''.
 
-'''NOTE:''' All of my libraries that are on %%EmacsWiki%% are also obtainable from [[http://melpa.milkbox.net/|MELPA]].  What's more, you can be pretty sure that they are untampered with, because their wiki pages are locked except to %%EmacsWiki%% administrators.
+''NOTE:'' You can be pretty sure that my libraries are untampered with, because their wiki pages are locked except to %%EmacsWiki%% administrators.
 
 
 
@@ -196,18 +196,19 @@ This page describes my EmacsLisp libraries: '''DrewsElispLibraries'''.
 === Recent Developments ===
 
 [new]
-* '''[[IsearchPlus]]''' -- IncrementalSearch enhancements
-* '''[[Icicles]]''' --  enhanced [[minibuffer]] input [[completion]] and [[Icicles - Cycling Completions|cycling]] 
-* '''LaCarte'''  --  execute ''menu'' commands using the keyboard, with [[completion]]
+* '''[[AproposUnicode|Apu]]''' -- `apropos' and more for Unicode characters
 * '''[[Bookmark+]]''' -- record places and things, tag stuff
+* '''[[Isearch+]]''' -- IncrementalSearch enhancements
+* '''LaCarte'''  --  execute ''menu'' commands using the keyboard, with [[completion]]
 * '''DoReMi'''   -- define [[command]]s to use the arrow keys or mouse wheel to change things incrementally
+* '''[[Icicles]]''' --  enhanced [[minibuffer]] input [[completion]] and [[Icicles - Cycling Completions|cycling]] 
 * '''ColorPalette''' -- examine color properties or choose colors
 * '''[[Synonyms]]'''  -- search and browse a hyperlinked thesaurus for synonyms
 
-* '''FaceMenuPlus'''  -- enhancements to the '''Text Properties''' menu
+* '''FaceMenuPlus''' -- enhancements to the '''Text Properties''' menu
 * '''ThingAtPointCommands''' -- commands to select things near the [[cursor]]
 * HighLight -- highlight text in different ways, hide/show [[face]]s
-* MousePlus -- highlight the [[yank]] position while you press ‘mouse-2’; other mouse enhancements
+* [[Mouse+]] -- highlight the [[yank]] position while you press ‘mouse-2’; other mouse enhancements
 * ModeLinePosition -- enhanced [[mode line]] support for [[variable]] `mode-line-position' (Emacs 22 and later)
 * CrosshairHighlighting, HighlightCurrentLine, HighlightCurrentColumn, ChangingCursorDynamically -- ways to make the [[cursor]] location ([[point]]) more apparent
 * CustomizingAndSaving  -- how to make [[Customize]] play better with the rest of Emacs
@@ -238,13 +239,13 @@ This page describes my EmacsLisp libraries: '''DrewsElispLibraries'''.
 * EmacsNewbie -- a gentle intro to Emacs, including Emacs-speak -- and pick up my <tt>[[emacs-init.el]]</tt> for info on using my libraries
 * [[ToolBar#ToolBarPlus|ToolBarPlus]] -- a pop-up [[tool bar]], to save screen real estate
 * HelpPlus, HelpMenuBarPlus, and HelpModePlus -- extra help: help commands and menus
-* DiredPlus -- '''Dired+''' (<tt>[[dired+.el]]</tt>): new commands, menus, highlighting...
+* [[Dired+]] -- (<tt>[[dired+.el]]</tt>): new commands, menus, highlighting...
 * SaveAsHtml -- create HTML with hyperlinks from Emacs [[buffer]]s ([[Info]] etc.): <tt>[[mkhtml.el]]</tt>
-* InfoPlus -- '''Info+''' (<tt>[[info+.el]]</tt>): new commands, menus, highlighting...
+* [[Info+]] -- (<tt>[[info+.el]]</tt>): new commands, menus, highlighting...
 * MenuBarPlus -- '''Menu-Bar+''' (<tt>[[menu-bar+.el]]</tt>): enhancements to the [[menu bar]] (new menus and commands)
 * FrameModes -- a different introduction to my [[frame]] libraries than that presented in OneOnOneEmacs
 * BufferMenuPlus -- '''Buffer Menu+''' (<tt>[[buff-menu+.el]]</tt>): a mouse popup menu (`mouse-3'), sorting, filtering, highlighting, time-last-accessed column,...
-* GrepPlus -- '''Grep+''' (<tt>[[compile-.el]]</tt>, <tt>[[compile+.el]]</tt>, <tt>[[grep+.el]]</tt>): highlighting, frame fitting
+* [[Grep+]] -- (<tt>[[compile-.el]]</tt>, <tt>[[compile+.el]]</tt>, <tt>[[grep+.el]]</tt>): highlighting, frame fitting
 * [[OccurBuffer#ReplacePlus]] -- '''Occur+''' (<tt>[[replace+.el]]</tt>): regexp highlighting, frame fitting
 * KillingBuffers -- replacement for `kill-buffer' that also deletes [[window]]s on [[buffer]]
 * RingPlus -- (<tt>[[ring+.el]]</tt>) extensions to standard library ##ring.el##. Circular lists etc.
@@ -254,7 +255,7 @@ This page describes my EmacsLisp libraries: '''DrewsElispLibraries'''.
 * CrosshairHighlighting, HighlightCurrentLine, HighlightCurrentColumn, ChangingCursorDynamically -- ways to make the [[cursor]] location ([[point]]) more apparent
 * [[IcompleteMode#IcompleteModePlus]] -- '''Icomplete Mode+''' (<tt>[[icomplete+.el]]</tt>): highlight possible [[completion]]s to [[minibuffer]] input
 * [[ImenuMode#ImenuModePlus]] -- '''Imenu+''' (<tt>[[imenu+.el]]</tt>): dynamically add mode-specific menus for definitions ([[key]]s, functions, macros, [[variable]]s...)
-* [[IsearchPlus]] -- IncrementalSearch enhancements
+* [[Isearch+]] -- IncrementalSearch enhancements
 * IncrementalSearch -- [[key binding]] recommendations
 * ShowWhiteSpace -- toggle highlighting of TABs, hard spaces, or trailing whitespace
 
@@ -271,8 +272,8 @@ Here are some screenshots of my Emacs.
 * ColorPalette -- A palette for choosing and editing colors: RGB, HSV, color names
 * DrewsEmacsTileSS -- View of whole desktop (Windows XP shown here): comparing two [[buffer]]s with `ediff-buffers' after tiling the [[frame]]s horizontally
 * DrewsEmacsBufferMenu -- Buffer Menu, showing context-sensitive `mouse-3' popup menu and highlighting (marks, columns, full-line mouse-over). More screenshots of Buffer Menu: [[Shrink-Wrapping Frames]].
-* DiredPlus -- [[DiredMode|Dired]]: similar features to Buffer Menu, but more
-* InfoPlus -- [[Info]], showing extra highlighting (quoted text, strings) and merged Info nodes
+* [[Dired+]] -- [[DiredMode|Dired]]: similar features to Buffer Menu, but more
+* [[Info+]] -- [[Info]], showing extra highlighting (quoted text, strings) and merged Info nodes
 * DrewsEmacsOccurImage -- `*Occur*' buffer, and a visited occurrence in a target [[buffer]], showing highlighting: match-string, visited-[[line]] number, full-line mouse-over (underline)
 * DrewsEmacsGrepImage -- `*grep*' buffer: features similar to `*Occur*' buffer
 * DrewEmacsImenuImage -- '''Defs''' imenu in Emacs-Lisp mode

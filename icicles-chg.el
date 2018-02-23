@@ -4,16 +4,16 @@
 ;; Description: Change logs for Icicles libraries.
 ;; Author: Drew Adams
 ;; Maintainer: Drew Adams (concat "drew.adams" "@" "oracle" ".com")
-;; Copyright (C) 2007-2017, Drew Adams, all rights reserved.
+;; Copyright (C) 2007-2018, Drew Adams, all rights reserved.
 ;; Created: Tue Nov 27 07:47:53 2007
-;; Last-Updated: Tue Dec 12 10:42:26 2017 (-0800)
+;; Last-Updated: Tue Feb 13 15:04:22 2018 (-0800)
 ;;           By: dradams
-;;     Update #: 11791
+;;     Update #: 11827
 ;; URL: https://www.emacswiki.org/emacs/download/icicles-chg.el
 ;; Doc URL: https://www.emacswiki.org/emacs/Icicles
 ;; Keywords: extensions, help, abbrev, local, minibuffer,
 ;;           keys, apropos, completion, matching, regexp, command
-;; Compatibility: GNU Emacs: 20.x, 21.x, 22.x, 23.x, 24.x, 25.x
+;; Compatibility: GNU Emacs: 20.x, 21.x, 22.x, 23.x, 24.x, 25.x, 26.x
 ;;
 ;; Features that might be required by this library:
 ;;
@@ -85,6 +85,8 @@
  
 ;;;(@* "CHANGE LOG FOR `icicles-cmd1.el'")
 ;;
+;; 2018/02/13 dadams
+;;     Removed (Emacs 23-25 only now): icicle-zap-to-char.
 ;; 2017/12/12 dadams
 ;;     icicle-kill-buffer: Use icicle-buffer behavior: multi-completions, filtering keys, etc.
 ;;                         Put icicle-Completions-window-max-height 200.
@@ -2294,6 +2296,14 @@
  
 ;;;(@* "CHANGE LOG FOR `icicles-fn.el'")
 ;;
+;; 2018/02/13 dadams
+;;     Removed (Emacs 23-25 only now): icicle-char-cands-from-charlist, icicle-make-char-candidate,
+;;                                     icicle-ucs-names, (icicle(-ORIG)-)read-char-by-name,
+;;                                     icicle-read-char-maybe-completing.
+;; 2018/01/15 dadams
+;;     Added: icicle-SPC-scatter-match, icicle-SPC-scatter-re.
+;;     Renamed: icicle-scatter to icicle-scatter-re.
+;;     icicle-scatter-match: Applied renaming of icicle-scatter.  Added it as obsolete alias.
 ;; 2017/12/10 dadams
 ;;     icicle-read-buffer: If icicle-buffer-complete-fn is nil use icicle-bufflist if it is a list.
 ;; 2017/10/22 dadams
@@ -4664,6 +4674,10 @@
  
 ;;;(@* "CHANGE LOG FOR `icicles-mcmd.el'")
 ;;
+;; 2018/01/15 dadams
+;;     icicle-display-candidates-in-Completions:
+;;       Added highlighting for icicle-SPC-scatter-match.
+;;       Applied renaming icicle-scatter -> icicle-scatter-re.
 ;; 2017/10/29 dadams
 ;;     icicle-delete-windows-on:
 ;;       Simpler test for whether frame has the active minibuffer window.
@@ -7795,6 +7809,16 @@
  
 ;;;(@* "CHANGE LOG FOR `icicles-opt.el'")
 ;;
+;; 2018/02/13 dadams
+;;     Removed (Emacs 23-25 only now): icicle-read-char-by-name-multi-completion-flag,
+;;                                     icicle-zap-to-char-candidates. 
+;;     icicle-functions-to-redefine: Removed read-char-by-name (Emacs 23-25 only now).
+;;     icicle-top-level-key-bindings: Removed zap-to-char (Emacs 23-25 only now).
+;; 2018/01/15 dadams
+;;     icicle-S-TAB-completion-methods-(alist|per-command): Added icicle-SPC-scatter-match.
+;;     icicle-S-TAB-completion-methods-(alist|per-command),
+;;       icicle-TAB-completion-methods(-per-command):
+;;         Mention in doc string that they don't apply to icicle-buffer and icicle-file etc.
 ;; 2017/12/10 dadams
 ;;     icicle-buffer-prefix-arg-filtering: Updated doc string for modified case (-).
 ;; 2017/06/25 dadams
@@ -8764,6 +8788,8 @@
  
 ;;;(@* "CHANGE LOG FOR `icicles-var.el'")
 ;;
+;; 2018/02/13 dadams
+;;     Removed (Emacs 23-25 only now): icicle-read-char-history.
 ;; 2017/12/10 dadams
 ;;     icicle-bufflist:
 ;;        Changed default value to a non-list, to distinguish from () when this is not used.
@@ -9244,6 +9270,10 @@
  
 ;;;(@* "CHANGE LOG FOR `icicles.el'")
 ;;
+;; 2018/02/13 dadams
+;;     Version 2018.02.13.
+;; 2018/01/15 dadams
+;;     Version 2018.01.15.
 ;; 2017/12/10 dadams
 ;;     Version 2017.12.10.
 ;; 2017/07/26 dadams

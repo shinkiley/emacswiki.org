@@ -4,16 +4,16 @@
 ;; Description: Minibuffer completion and cycling.
 ;; Author: Drew Adams
 ;; Maintainer: Drew Adams (concat "drew.adams" "@" "oracle" ".com")
-;; Copyright (C) 1996-2017, Drew Adams, all rights reserved.
+;; Copyright (C) 1996-2018, Drew Adams, all rights reserved.
 ;; Created: Tue Aug  1 14:21:16 1995
-;; Last-Updated: Wed Nov 29 15:18:32 2017 (-0800)
+;; Last-Updated: Tue Feb 13 15:19:41 2018 (-0800)
 ;;           By: dradams
-;;     Update #: 29998
+;;     Update #: 30061
 ;; URL: https://www.emacswiki.org/emacs/download/icicles-doc2.el
 ;; Doc URL: https://www.emacswiki.org/emacs/Icicles
 ;; Keywords: internal, extensions, help, abbrev, local, minibuffer,
 ;;           keys, apropos, completion, matching, regexp, command
-;; Compatibility: GNU Emacs: 20.x, 21.x, 22.x, 23.x, 24.x, 25.x
+;; Compatibility: GNU Emacs: 20.x, 21.x, 22.x, 23.x, 24.x, 25.x, 26.x
 ;;
 ;; Features that might be required by this library:
 ;;
@@ -47,7 +47,7 @@
 ;;  highlight this Index and render it more readable.  Likewise, for
 ;;  the cross-references and section headings throughout this file.
 ;;  You can get `linkd.el' here:
-;;  https://www.emacswiki.org/emacs/linkd.el.
+;;  https://www.emacswiki.org/emacs/download/linkd.el.
 ;;
 ;;  (@file :file-name "icicles-doc1.el" :to "Documentation in File `icicles-doc1.el'")
 ;;  -----------------------------------------------------------
@@ -299,6 +299,7 @@
 ;;    (@> "Icicles with Anything")
 ;;
 ;;  (@> "Completion Methods and Styles")
+;;    (@> "Some Icicles Commands Hard-Code Completion Methods")
 ;;    (@> "Vanilla Emacs Styles and Option `completing-styles'")
 ;;    (@> "Prefix Completion Method `vanilla'")
 ;;    (@> "Icicles Completion Methods")
@@ -306,6 +307,7 @@
 ;;    (@> "Command-Specific Completion Methods")
 ;;    (@> "Fuzzy Completion")
 ;;      (@> "Scatter-Match (Flex) Completion")
+;;      (@> "`SPC' Scatter-Match Completion")
 ;;      (@> "Swank (Fuzzy Symbol) Completion")
 ;;      (@> "Fuzzy-Match Completion")
 ;;      (@> "Levenshtein Completion")
@@ -3789,7 +3791,7 @@
 ;;  causes problems if `icicle-define-alias-commands-flag' is
 ;;  non-`nil'.  Here is the bug description, filed 2007/10/05 by Bjorn
 ;;  Haagensen:
-;;  http://lists.gnu.org/archive/html/bug-auctex/2007-10/msg00006.html.
+;;  https://lists.gnu.org/archive/html/bug-auctex/2007-10/msg00006.html.
 ;;  The problem is that AUCTeX mistakenly invokes the Icicles `file'
 ;;  command, in an inappropriate context.  AUCTeX does not define any
 ;;  function `file' when it is loaded, but it invokes one, if defined.
@@ -4014,6 +4016,22 @@
 ;;  calls the methods provided by `S-TAB' "apropos" completion
 ;;  methods.
 ;;
+;;(@* "Some Icicles Commands Hard-Code Completion Methods")
+;;  ** "Some Icicles Commands Hard-Code Completion Methods" **
+;;
+;;  Some Icicles commands that allow for multi-completion input,
+;;  ignore your current choices of `TAB' and `S-TAB' completion
+;;  method.
+;;
+;;  In particular, this is the case for commands `icicle-file' and
+;;  `icicle-buffer' and similar.  Such commands have their own way of
+;;  matching the multi-completion parts.
+;;
+;;  If you want to use alternative completion methods for completion
+;;  of file and buffer names then use a different command.  In that
+;;  case, consider customizing option `icicle-top-level-key-bindings'
+;;  to remove the default key bindings for such commands.
+;;
 ;;(@* "Vanilla Emacs Styles and Option `completing-styles'")
 ;;  ** Vanilla Emacs Styles and Option `completing-styles' **
 ;;
@@ -4123,7 +4141,15 @@
 ;;  * `scatter' - This is a simple, poor man's fuzzy matching method
 ;;    that I call "scatter matching".  Ido calls it "flex" matching.
 ;;    The TextMate editor has the same thing for file-name matching
-;;    (only), without naming it.
+;;    (only), without naming it.  It matches the your input
+;;    characters, in order, against completion candidates, but
+;;    possibly with intervening (non-newline) characters.  It amounts
+;;    to matching input `abc' as if it were the regexp `a.*b.*c'.
+;;
+;;  * `SPC scatter' - This is another poor man's fuzzy method, which
+;;    is used by some Emacs packages such as Ivy.  It matches the
+;;    parts of your input that are separated by `SPC' characters,
+;;    matching arbitrary text at the separations between those parts.
 ;;
 ;;  * `Levenshtein' - This method checks whether two strings differ by
 ;;    at most a given number of character operations, the so-called
@@ -4146,8 +4172,8 @@
 ;;
 ;;  My own opinion about the relative usefulness of the various
 ;;  completion methods, in order from the most useful: `apropos',
-;;  `basic', `vanilla', `scatter', `fuzzy', `Levenshtein',
-;;  `Jaro-Winkler', and `swank'.  YMMV.
+;;  `basic', `vanilla', `scatter', `SPC scatter', `fuzzy',
+;;  `Levenshtein', `Jaro-Winkler', and `swank'.  YMMV.
 ;;
 ;;  Besides all of these completion methods, remember that you can get
 ;;  ordinary substring matching with `S-TAB' by using `C-`' to turn
@@ -4169,9 +4195,9 @@
 ;;    library `el-swank-fuzzy.el').
 ;;
 ;;  * `M-(' (command `icicle-next-S-TAB-completion-method') to cycle
-;;    `S-TAB' completion methods: `apropos', `scatter', `Levenshtein',
-;;    `Levenshtein strict', and `Jaro-Winkler' (only if you have the
-;;    Autocomplete library `fuzzy.el').
+;;    `S-TAB' completion methods: `apropos', `scatter', `SPC scatter',
+;;    `Levenshtein', `Levenshtein strict', and `Jaro-Winkler' (only if
+;;    you have the Autocomplete library `fuzzy.el').
 ;;
 ;;  Repeating `C-(' and `TAB' or `M-(' and `S-TAB' on the fly for the
 ;;  same input can be a good way to learn the differences between the
@@ -4244,23 +4270,42 @@
 ;;(@* "Scatter-Match (Flex) Completion")
 ;;  *** Scatter-Match (Flex) Completion ***
 ;;
-;;  What Icicles calls "scatter-match" completion (`TAB' completion
+;;  What Icicles calls "scatter-match" completion (`S-TAB' completion
 ;;  method `scatter') is sometimes "flex" completion (for Ido, for
 ;;  example) called.
 ;;
 ;;  The idea is very simple: input characters are matched in order
 ;;  against completion candidates, but possibly with intervening
-;;  characters.  That is, your input scatter-matches a completion
-;;  candidate if each character is also in the candidate, and the
-;;  character order is respected.
+;;  (non-newline) characters.  That is, your input scatter-matches a
+;;  completion candidate if each character is also in the candidate,
+;;  and the character order is respected.
 ;;
 ;;  What this really amounts to is matching input `abc' as if it were
 ;;  the regexp `a.*b.*c'.  That's all.
 ;;
-;;  You can use Icicles scatter matching anytime in place of apropos
-;;  (regexp) matching.  Unlike the cases of swank and fuzzy-match
-;;  completion (see below), you can use it to complete file names
-;;  also.
+;;  You can use Icicles scatter matching in place of apropos (regexp)
+;;  matching.  Unlike the cases of swank and fuzzy-match completion
+;;  (see below), you can use it to complete file names also.
+;;
+;;(@* "`SPC' Scatter-Match Completion")
+;;  ** `SPC' Scatter-Match Completion **
+;;
+;;  This is the method that library Ivy uses for its "fuzzy" matching.
+;;
+;;  This is like method `scatter', except that instead of matching
+;;  each input character, allowing matching of arbitrary (non-newline)
+;;  text between them, it matches each sequence of non-`SPC'
+;;  characters, allowing matching of arbitrary (non-newline) text
+;;  between them.
+;;
+;;  More precisely, this acts as if a single `SPC' character of a
+;;  sequence of `SPC' characters in your input were `.*', leaving the
+;;  other `SPC' characters in that sequence to be matched literally.
+;;  It amounts to matching input `abc    def  gh i' as if it were the
+;;  regexp (four `SPC' characters between `abc' and `def', two between
+;;  `def' and `gh', one between `gh' and `i') as the regexp
+;;  `abc   .*def .*gh.*i' (three `SPC' characters between `abc' and
+;;  `def', and two between `def' and `gh').
 ;;
 ;;(@* "Swank (Fuzzy Symbol) Completion")
 ;;  *** Swank (Fuzzy Symbol) Completion ***
@@ -4530,7 +4575,9 @@
 ;;  * (@file :file-name "icicles-doc1.el" :to "Apropos Completions")
 ;;    for completion with regexp matching
 ;;
-;;  * http://en.wikipedia.org/wiki/Jaro-Winkler_distance for
+;;  * (@file :file-name "icicles-doc1.el" :to "Multi-Completions")
+;;
+;;  * https://en.wikipedia.org/wiki/Jaro-Winkler_distance for
 ;;    information about Jaro-Winkler matching
  
 ;;(@* "Completion in Other Buffers")
@@ -4737,7 +4784,7 @@
 ;;  Emacs.  You can obtain a recent version, such as 3.1, from one of
 ;;  these locations:
 ;;
-;;  * http://download.savannah.gnu.org/releases/bbdb/
+;;  * https://download.savannah.gnu.org/releases/bbdb/
 ;;  * http://melpa.milkbox.net/
 ;;
 ;;  If user option `icicle-functions-to-redefine' contains an entry
@@ -6634,7 +6681,7 @@
 ;;    such option saving using their own function instead of the
 ;;    default value, `customize-save-variable'.
 ;;
-;;  * Non-`nil' option
+;;  * (Emacs 23-25 only.) Non-`nil' option
 ;;    `icicle-read-char-by-name-multi-completion-flag' means that
 ;;    `icicle-read-char-by-name' (which, by the default value of
 ;;    option `icicle-functions-to-redefine', replaces vanilla
@@ -6660,14 +6707,15 @@
 ;;    * choosing a strong input pattern, before asking for candidate
 ;;      matching
 ;;
-;;  * Option `icicle-zap-to-char-candidates' determines which
-;;    character names are used for `icicle-zap-to-char' (bound to
-;;    `M-z' by default) when completing.  The default value of `nil'
-;;    means complete against character names that you have already
-;;    entered.  You can instead set the value to `icicle-ucs-names' to
-;;    complete against all Unicode character names.  Or you can set it
-;;    to any function that returns a value of the same form at that
-;;    returned by `icicle-ucs-names' (hence `ucs-names').
+;;  * (Emacs 23-25 only.) Option `icicle-zap-to-char-candidates'
+;;    determines which character names are used for
+;;    `icicle-zap-to-char' (bound to `M-z' by default) when
+;;    completing.  The default value of `nil' means complete against
+;;    character names that you have already entered.  You can instead
+;;    set the value to `icicle-ucs-names' to complete against all
+;;    Unicode character names.  Or you can set it to any function that
+;;    returns a value of the same form at that returned by
+;;    `icicle-ucs-names' (hence `ucs-names').
 ;;
 ;;  * The options whose names start with prefix `icicle-cand-preds-'
 ;;    are lists of predefined predicates that are used to filter

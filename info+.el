@@ -4,17 +4,17 @@
 ;; Description: Extensions to `info.el'.
 ;; Author: Drew Adams
 ;; Maintainer: Drew Adams (concat "drew.adams" "@" "oracle" ".com")
-;; Copyright (C) 1996-2017, Drew Adams, all rights reserved.
+;; Copyright (C) 1996-2018, Drew Adams, all rights reserved.
 ;; Created: Tue Sep 12 16:30:11 1995
 ;; Version: 0
 ;; Package-Requires: ()
-;; Last-Updated: Fri Nov 17 10:02:09 2017 (-0800)
+;; Last-Updated: Wed Jan 10 10:18:09 2018 (-0800)
 ;;           By: dradams
-;;     Update #: 6275
+;;     Update #: 6280
 ;; URL: https://www.emacswiki.org/emacs/download/info%2b.el
 ;; Doc URL: https://www.emacswiki.org/emacs/InfoPlus
 ;; Keywords: help, docs, internal
-;; Compatibility: GNU Emacs: 23.x, 24.x, 25.x
+;; Compatibility: GNU Emacs: 23.x, 24.x, 25.x, 26.x
 ;;
 ;; Features that might be required by this library:
 ;;
@@ -1006,9 +1006,9 @@ info+.el bug: \
 &body=Describe bug here, starting with `emacs -q'.  \
 Don't forget to mention your Emacs and library versions."))
   :link '(url-link :tag "Other Libraries by Drew"
-          "https://www.emacswiki.org/DrewsElispLibraries")
-  :link '(url-link :tag "Download" "https://www.emacswiki.org/info+.el")
-  :link '(url-link :tag "Description" "https://www.emacswiki.org/InfoPlus")
+          "https://www.emacswiki.org/emacs/DrewsElispLibraries")
+  :link '(url-link :tag "Download" "https://www.emacswiki.org/emacs/download/info%2b.el")
+  :link '(url-link :tag "Description" "https://www.emacswiki.org/emacs/InfoPlus")
   :link '(emacs-commentary-link :tag "Commentary" "info+")
   )
 
@@ -1443,7 +1443,7 @@ If ... contains an end char then that char must be backslashed.")
   (interactive)
   (Info-follow-nearest-node t))
 
-;;;###autoload (autoload 'Info-clear "info+")
+;;;###autoload (autoload 'Info-history-clear "info+")
 (defun Info-history-clear (&optional msgp)
   "Clear Info history and reload current manual."
   (interactive (progn (unless (y-or-n-p "Clear the Info history? ") (info-user-error "OK, canceled"))
